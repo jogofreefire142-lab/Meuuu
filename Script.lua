@@ -35,7 +35,10 @@ local CONFIG = {
     SelectedPlayer = "Nenhum",
     MaxSpeed = 1000,
     Organize = false,
-    ClickTP = false
+    ClickTP = false,
+    VelocidadeGlobal = 1000,
+    AplicarVelocidade = false,
+    LimiteVelocidade = 1000
 }
 
 -- Caminho para salvar configurações
@@ -83,34 +86,51 @@ local function getRoot()
     return char and char:FindFirstChild("HumanoidRootPart")
 end
 
--- Função para aplicar velocidade
-local function applySpeed()
+-- Função para aplicar velocidade universal
+local function applyUniversalSpeed()
     local hum = getHum()
     if hum then
-        hum.WalkSpeed = CONFIG.WalkSpeed
+        if CONFIG.AplicarVelocidade then
+            hum.WalkSpeed = CONFIG.VelocidadeGlobal
+        else
+            hum.WalkSpeed = CONFIG.WalkSpeed
+        end
+    end
+    
+    local root = getRoot()
+    if root and CONFIG.Fly then
+        local bv = root:FindFirstChild("BodyVelocity")
+        if bv then
+            if CONFIG.AplicarVelocidade then
+                bv.Velocity = bv.Velocity.Unit * CONFIG.VelocidadeGlobal
+            else
+                bv.Velocity = bv.Velocity.Unit * CONFIG.FlySpeed
+            end
+        end
     end
 end
 
--- Função para aplicar jump power
-local function applyJumpPower()
+-- Função para aplicar todas as configurações
+local function applyConfig()
     local hum = getHum()
+    local root = getRoot()
+    
     if hum then
+        if CONFIG.AplicarVelocidade then
+            hum.WalkSpeed = CONFIG.VelocidadeGlobal
+        else
+            hum.WalkSpeed = CONFIG.WalkSpeed
+        end
+        
         hum.JumpPower = CONFIG.JumpPower
         hum.UseJumpPower = true
+        
+        if CONFIG.Sit then
+            hum.Sit = true
+        end
     end
-end
-
--- Função para aplicar gravidade
-local function applyGravity()
-    workspace.GlobalGravity = CONFIG.Gravity * 196.2
-end
-
--- Função para aplicar fly
-local function applyFly()
-    local root = getRoot()
-    local hum = getHum()
     
-    if root and hum and CONFIG.Fly then
+    if root and CONFIG.Fly then
         hum.PlatformStand = true
         
         local bv = Instance.new("BodyVelocity")
@@ -139,15 +159,19 @@ local function applyFly()
                     local rightAmount = moveDir:Dot(flatRight)
                     
                     local finalDir = (camLook * forwardAmount) + (camRight * rightAmount)
-                    bv.Velocity = finalDir * CONFIG.FlySpeed
+                    
+                    local speed = CONFIG.AplicarVelocidade and CONFIG.VelocidadeGlobal or CONFIG.FlySpeed
+                    bv.Velocity = finalDir * speed
                 else
                     bv.Velocity = Vector3.zero
                 end
                 
                 if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
-                    bv.Velocity = bv.Velocity + Vector3.new(0, CONFIG.FlySpeed, 0)
+                    local speed = CONFIG.AplicarVelocidade and CONFIG.VelocidadeGlobal or CONFIG.FlySpeed
+                    bv.Velocity = bv.Velocity + Vector3.new(0, speed, 0)
                 elseif UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
-                    bv.Velocity = bv.Velocity - Vector3.new(0, CONFIG.FlySpeed, 0)
+                    local speed = CONFIG.AplicarVelocidade and CONFIG.VelocidadeGlobal or CONFIG.FlySpeed
+                    bv.Velocity = bv.Velocity - Vector3.new(0, speed, 0)
                 end
                 
                 RunService.Heartbeat:Wait()
@@ -159,14 +183,6 @@ local function applyFly()
             if currentHum then currentHum.PlatformStand = false end
         end)
     end
-end
-
--- Função para aplicar todas as configurações
-local function applyConfig()
-    applySpeed()
-    applyJumpPower()
-    applyGravity()
-    applyFly()
     
     workspace.CurrentCamera.FieldOfView = CONFIG.FOV
     
@@ -188,7 +204,7 @@ end
 
 -- Função para limitar velocidade
 local function limitSpeed(speed)
-    return math.min(speed, CONFIG.MaxSpeed)
+    return math.min(speed, CONFIG.LimiteVelocidade)
 end
 
 -- Criar Janela Rayfield
@@ -206,30 +222,89 @@ local PlayerTab = Window:CreateTab("Player", 4483362458)
 -- === 1. MOVIMENTAÇÃO E FÍSICA ===
 PlayerTab:CreateSection("🏃 Movimentação e Física")
 
+-- Slider de Velocidade Universal
+PlayerTab:CreateSlider({
+    Name = "Velocidade Universal",
+    Range = {1, 1000},
+    Increment = 1,
+    CurrentValue = 1000,
+    Callback = function(Value)
+        CONFIG.VelocidadeGlobal = Value
+        if CONFIG.AplicarVelocidade then
+            applyUniversalSpeed()
+        end
+        Rayfield:Notify("Velocidade universal definida para " .. Value, 3, "SUCCESS")
+    end,
+})
+
+-- Toggle para ativar velocidade universal
+PlayerTab:CreateToggle({
+    Name = "Ativar Velocidade Universal",
+    CurrentValue = false,
+    Callback = function(Value)
+        CONFIG.AplicarVelocidade = Value
+        if Value then
+            applyUniversalSpeed()
+            Rayfield:Notify("Velocidade universal ATIVADA!", 3, "SUCCESS")
+        else
+            applyUniversalSpeed()
+            Rayfield:Notify("Velocidade universal DESATIVADA", 3, "INFO")
+        end
+    end,
+})
+
+-- Slider de Limite de Velocidade
+PlayerTab:CreateSlider({
+    Name = "Limite de Velocidade",
+    Range = {1, 1000},
+    Increment = 1,
+    CurrentValue = 1000,
+    Callback = function(Value)
+        CONFIG.LimiteVelocidade = Value
+        CONFIG.WalkSpeed = limitSpeed(CONFIG.WalkSpeed)
+        CONFIG.FlySpeed = limitSpeed(CONFIG.FlySpeed)
+        CONFIG.VelocidadeGlobal = limitSpeed(CONFIG.VelocidadeGlobal)
+        Rayfield:Notify("Limite de velocidade definido para " .. Value, 3, "INFO")
+    end,
+})
+
+-- Slider de Velocidade Máxima
 PlayerTab:CreateSlider({
     Name = "Velocidade Máxima",
-    Range = {16, 1000},
+    Range = {1, 1000},
     Increment = 1,
     CurrentValue = 1000,
     Callback = function(Value)
         CONFIG.MaxSpeed = Value
         CONFIG.WalkSpeed = limitSpeed(CONFIG.WalkSpeed)
         CONFIG.FlySpeed = limitSpeed(CONFIG.FlySpeed)
-        applySpeed()
+        local hum = getHum()
+        if hum then 
+            if CONFIG.AplicarVelocidade then
+                hum.WalkSpeed = CONFIG.VelocidadeGlobal
+            else
+                hum.WalkSpeed = CONFIG.WalkSpeed
+            end
+        end
     end,
 })
 
+-- Slider de WalkSpeed
 PlayerTab:CreateSlider({
     Name = "WalkSpeed (Velocidade)",
-    Range = {16, 1000},
+    Range = {1, 1000},
     Increment = 1,
     CurrentValue = 16,
     Callback = function(Value)
         CONFIG.WalkSpeed = limitSpeed(Value)
-        applySpeed()
+        local hum = getHum()
+        if hum and not CONFIG.AplicarVelocidade then
+            hum.WalkSpeed = CONFIG.WalkSpeed
+        end
     end,
 })
 
+-- Slider de JumpPower
 PlayerTab:CreateSlider({
     Name = "JumpPower (Força do Pulo)",
     Range = {50, 300},
@@ -237,10 +312,15 @@ PlayerTab:CreateSlider({
     CurrentValue = 50,
     Callback = function(Value)
         CONFIG.JumpPower = Value
-        applyJumpPower()
+        local hum = getHum()
+        if hum then
+            hum.UseJumpPower = true
+            hum.JumpPower = Value
+        end
     end,
 })
 
+-- Slider de Gravidade
 PlayerTab:CreateSlider({
     Name = "Gravidade",
     Range = {0.1, 5},
@@ -248,10 +328,11 @@ PlayerTab:CreateSlider({
     CurrentValue = 1,
     Callback = function(Value)
         CONFIG.Gravity = Value
-        applyGravity()
+        workspace.GlobalGravity = Value * 196.2
     end,
 })
 
+-- Toggle de Infinite Jump
 PlayerTab:CreateToggle({
     Name = "Infinite Jump (Pulo Infinito)",
     CurrentValue = false,
@@ -260,6 +341,7 @@ PlayerTab:CreateToggle({
     end,
 })
 
+-- Toggle de Noclip
 PlayerTab:CreateToggle({
     Name = "Noclip (Atravessar Paredes)",
     CurrentValue = false,
@@ -268,6 +350,7 @@ PlayerTab:CreateToggle({
     end,
 })
 
+-- Toggle de Spin
 PlayerTab:CreateToggle({
     Name = "Spin (Girar Rápido)",
     CurrentValue = false,
@@ -276,6 +359,7 @@ PlayerTab:CreateToggle({
     end,
 })
 
+-- Slider de SpinSpeed
 PlayerTab:CreateSlider({
     Name = "SpinSpeed (Velocidade do Giro)",
     Range = {1, 50},
@@ -286,6 +370,7 @@ PlayerTab:CreateSlider({
     end,
 })
 
+-- Toggle de Sit
 PlayerTab:CreateToggle({
     Name = "Sit (Sentar)",
     CurrentValue = false,
@@ -303,6 +388,7 @@ PlayerTab:CreateToggle({
 -- === 2. FLY (VOAR) ===
 PlayerTab:CreateSection("✈️ Fly (Voar)")
 
+-- Toggle de Fly
 PlayerTab:CreateToggle({
     Name = "Ativar Fly (Mobile/PC)",
     CurrentValue = false,
@@ -324,9 +410,10 @@ PlayerTab:CreateToggle({
     end,
 })
 
+-- Slider de FlySpeed
 PlayerTab:CreateSlider({
     Name = "Velocidade do Fly",
-    Range = {10, 1000},
+    Range = {1, 1000},
     Increment = 5,
     CurrentValue = 50,
     Callback = function(Value)
@@ -337,6 +424,7 @@ PlayerTab:CreateSlider({
 -- === 3. VISUAL E CÂMERA ===
 PlayerTab:CreateSection("👁️ Visual e Câmera")
 
+-- Toggle de ESP
 PlayerTab:CreateToggle({
     Name = "ESP Players (Ver Jogadores)",
     CurrentValue = false,
@@ -352,6 +440,7 @@ PlayerTab:CreateToggle({
     end,
 })
 
+-- Toggle de Fullbright
 PlayerTab:CreateToggle({
     Name = "Fullbright (Brilho Máximo)",
     CurrentValue = false,
@@ -368,6 +457,7 @@ PlayerTab:CreateToggle({
     end,
 })
 
+-- Toggle de NoFog
 PlayerTab:CreateToggle({
     Name = "No Fog (Sem Neblina)",
     CurrentValue = false,
@@ -381,6 +471,7 @@ PlayerTab:CreateToggle({
     end,
 })
 
+-- Slider de FOV
 PlayerTab:CreateSlider({
     Name = "FOV (Campo de Visão)",
     Range = {50, 120},
@@ -392,6 +483,7 @@ PlayerTab:CreateSlider({
     end,
 })
 
+-- Toggle de FreeCam
 PlayerTab:CreateToggle({
     Name = "FreeCam (Câmera Livre)",
     CurrentValue = false,
@@ -529,13 +621,31 @@ PlayerTab:CreateButton({
             SelectedPlayer = "Nenhum",
             MaxSpeed = 1000,
             Organize = false,
-            ClickTP = false
+            ClickTP = false,
+            VelocidadeGlobal = 1000,
+            AplicarVelocidade = false,
+            LimiteVelocidade = 1000
         }
         applyConfig()
         Rayfield:Notify("Configurações resetadas!", 3, "SUCCESS")
     end,
 })
 
+-- Botão para resetar apenas a velocidade
+PlayerTab:CreateButton({
+    Name = "Resetar Velocidade",
+    Callback = function()
+        CONFIG.VelocidadeGlobal = 1000
+        CONFIG.AplicarVelocidade = false
+        CONFIG.LimiteVelocidade = 1000
+        CONFIG.WalkSpeed = 16
+        CONFIG.FlySpeed = 50
+        applyConfig()
+        Rayfield:Notify("Velocidade resetada!", 3, "SUCCESS")
+    end,
+})
+
+-- Toggle de Anti-AFK
 PlayerTab:CreateToggle({
     Name = "Anti-AFK",
     CurrentValue = false,
@@ -544,6 +654,7 @@ PlayerTab:CreateToggle({
     end,
 })
 
+-- Botão de Resetar Personagem
 PlayerTab:CreateButton({
     Name = "Resetar Personagem",
     Callback = function()
@@ -552,6 +663,7 @@ PlayerTab:CreateButton({
     end,
 })
 
+-- Botão de Rejoin
 PlayerTab:CreateButton({
     Name = "Rejoin (Entrar de Novo)",
     Callback = function()
@@ -560,6 +672,7 @@ PlayerTab:CreateButton({
     end,
 })
 
+-- Botão de Server Hop
 PlayerTab:CreateButton({
     Name = "Server Hop (Trocar Servidor)",
     Callback = function()
@@ -593,24 +706,28 @@ player.CharacterAdded:Connect(function(newCharacter)
 end)
 
 -- === LOOP DE PROTEÇÃO CONTRA RESET ===
--- Este loop garante que a velocidade seja mantida mesmo que o jogo tente alterá-la
 RunService.Stepped:Connect(function()
     local hum = getHum()
-    if hum and CONFIG.WalkSpeed > 16 then
-        -- Verifica se a velocidade foi alterada pelo jogo
-        if hum.WalkSpeed ~= CONFIG.WalkSpeed then
-            -- Reaplica a velocidade
-            hum.WalkSpeed = CONFIG.WalkSpeed
+    if hum then
+        if CONFIG.AplicarVelocidade then
+            if hum.WalkSpeed ~= CONFIG.VelocidadeGlobal then
+                hum.WalkSpeed = CONFIG.VelocidadeGlobal
+            end
+        else
+            if hum.WalkSpeed ~= CONFIG.WalkSpeed then
+                hum.WalkSpeed = CONFIG.WalkSpeed
+            end
         end
     end
     
-    -- Mantém a velocidade do fly consistente
     local root = getRoot()
     if root and CONFIG.Fly then
         local bv = root:FindFirstChild("BodyVelocity")
-        if bv and bv.Velocity.Magnitude > 0 then
-            -- Mantém a velocidade do fly
-            bv.Velocity = bv.Velocity.Unit * CONFIG.FlySpeed
+        if bv then
+            local speed = CONFIG.AplicarVelocidade and CONFIG.VelocidadeGlobal or CONFIG.FlySpeed
+            if bv.Velocity.Magnitude > 0 then
+                bv.Velocity = bv.Velocity.Unit * speed
+            end
         end
     end
 end)
