@@ -83,7 +83,7 @@ local function getRoot()
     return char and char:FindFirstChild("HumanoidRootPart")
 end
 
--- Função para aplicar configurações
+-- Função para aplicar todas as configurações
 local function applyConfig()
     local hum = getHum()
     local root = getRoot()
@@ -485,6 +485,40 @@ PlayerTab:CreateButton({
     Callback = function()
         loadConfig()
         applyConfig()
+        Rayfield:Notify("Configurações carregadas e aplicadas!", 3, "SUCCESS")
+    end,
+})
+
+-- Botão para resetar configurações
+PlayerTab:CreateButton({
+    Name = "Resetar Configurações",
+    Callback = function()
+        CONFIG = {
+            WalkSpeed = 16,
+            JumpPower = 50,
+            Gravity = 1,
+            InfiniteJump = false,
+            Noclip = false,
+            Spin = false,
+            SpinSpeed = 10,
+            Sit = false,
+            Fly = false,
+            FlySpeed = 50,
+            ESP = false,
+            Fullbright = false,
+            NoFog = false,
+            FOV = 70,
+            FreeCam = false,
+            AntiAFK = false,
+            Rejoin = false,
+            ServerHop = false,
+            SelectedPlayer = "Nenhum",
+            MaxSpeed = 1000,
+            Organize = false,
+            ClickTP = false
+        }
+        applyConfig()
+        Rayfield:Notify("Configurações resetadas!", 3, "SUCCESS")
     end,
 })
 
