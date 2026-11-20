@@ -30,6 +30,7 @@ local CONFIG = {
     FOV = 70,
     FreeCam = false,
     AntiAFK = false,
+    AntiLag = false, -- Nova configuração
     Rejoin = false,
     ServerHop = false,
     SelectedPlayer = "Nenhum",
@@ -174,7 +175,12 @@ local function applyConfig()
                     bv.Velocity = bv.Velocity - Vector3.new(0, speed, 0)
                 end
                 
-                RunService.Heartbeat:Wait()
+                -- Anti-Lag: reduz a frequência de atualização do fly
+                if CONFIG.AntiLag then
+                    wait(0.05) -- 50ms
+                else
+                    RunService.Heartbeat:Wait()
+                end
             end
             
             bv:Destroy()
@@ -205,6 +211,15 @@ end
 -- Função para limitar velocidade
 local function limitSpeed(speed)
     return math.min(speed, CONFIG.LimiteVelocidade)
+end
+
+-- Função para obter intervalo de atualização com Anti-Lag
+local function getUpdateInterval()
+    if CONFIG.AntiLag then
+        return 0.1 -- 100ms para loops não críticos
+    else
+        return 0 -- Atualiza a cada frame
+    end
 end
 
 -- Criar Janela Rayfield
@@ -577,6 +592,20 @@ PlayerTab:CreateButton({
     end,
 })
 
+-- Toggle de Anti-Lag (Nova)
+PlayerTab:CreateToggle({
+    Name = "Anti-Lag (Estabilizar FPS)",
+    CurrentValue = false,
+    Callback = function(Value)
+        CONFIG.AntiLag = Value
+        if Value then
+            Rayfield:Notify("Anti-Lag ATIVADO! FPS estabilizado.", 3, "SUCCESS")
+        else
+            Rayfield:Notify("Anti-Lag DESATIVADO", 3, "INFO")
+        end
+    end,
+})
+
 -- Botão para salvar configurações
 PlayerTab:CreateButton({
     Name = "Salvas Configurações",
@@ -616,6 +645,7 @@ PlayerTab:CreateButton({
             FOV = 70,
             FreeCam = false,
             AntiAFK = false,
+            AntiLag = false,
             Rejoin = false,
             ServerHop = false,
             SelectedPlayer = "Nenhum",
@@ -738,6 +768,9 @@ end)
 RunService.Stepped:Connect(function()
     local char = player.Character
     if not char then return end
+    
+    -- Anti-Lag: reduz frequência de atualização
+    wait(getUpdateInterval())
     
     if CONFIG.Noclip then
         for _, part in pairs(char:GetDescendants()) do
