@@ -83,22 +83,34 @@ local function getRoot()
     return char and char:FindFirstChild("HumanoidRootPart")
 end
 
--- Função para aplicar todas as configurações
-local function applyConfig()
+-- Função para aplicar velocidade
+local function applySpeed()
     local hum = getHum()
-    local root = getRoot()
-    
     if hum then
         hum.WalkSpeed = CONFIG.WalkSpeed
+    end
+end
+
+-- Função para aplicar jump power
+local function applyJumpPower()
+    local hum = getHum()
+    if hum then
         hum.JumpPower = CONFIG.JumpPower
         hum.UseJumpPower = true
-        
-        if CONFIG.Sit then
-            hum.Sit = true
-        end
     end
+end
+
+-- Função para aplicar gravidade
+local function applyGravity()
+    workspace.GlobalGravity = CONFIG.Gravity * 196.2
+end
+
+-- Função para aplicar fly
+local function applyFly()
+    local root = getRoot()
+    local hum = getHum()
     
-    if root and CONFIG.Fly then
+    if root and hum and CONFIG.Fly then
         hum.PlatformStand = true
         
         local bv = Instance.new("BodyVelocity")
@@ -147,6 +159,14 @@ local function applyConfig()
             if currentHum then currentHum.PlatformStand = false end
         end)
     end
+end
+
+-- Função para aplicar todas as configurações
+local function applyConfig()
+    applySpeed()
+    applyJumpPower()
+    applyGravity()
+    applyFly()
     
     workspace.CurrentCamera.FieldOfView = CONFIG.FOV
     
@@ -195,8 +215,7 @@ PlayerTab:CreateSlider({
         CONFIG.MaxSpeed = Value
         CONFIG.WalkSpeed = limitSpeed(CONFIG.WalkSpeed)
         CONFIG.FlySpeed = limitSpeed(CONFIG.FlySpeed)
-        local hum = getHum()
-        if hum then hum.WalkSpeed = CONFIG.WalkSpeed end
+        applySpeed()
     end,
 })
 
@@ -207,8 +226,7 @@ PlayerTab:CreateSlider({
     CurrentValue = 16,
     Callback = function(Value)
         CONFIG.WalkSpeed = limitSpeed(Value)
-        local hum = getHum()
-        if hum then hum.WalkSpeed = CONFIG.WalkSpeed end
+        applySpeed()
     end,
 })
 
@@ -219,11 +237,7 @@ PlayerTab:CreateSlider({
     CurrentValue = 50,
     Callback = function(Value)
         CONFIG.JumpPower = Value
-        local hum = getHum()
-        if hum then
-            hum.UseJumpPower = true
-            hum.JumpPower = Value
-        end
+        applyJumpPower()
     end,
 })
 
@@ -234,7 +248,7 @@ PlayerTab:CreateSlider({
     CurrentValue = 1,
     Callback = function(Value)
         CONFIG.Gravity = Value
-        workspace.GlobalGravity = Value * 196.2
+        applyGravity()
     end,
 })
 
@@ -576,6 +590,29 @@ PlayerTab:CreateButton({
 player.CharacterAdded:Connect(function(newCharacter)
     task.wait(0.5)
     applyConfig()
+end)
+
+-- === LOOP DE PROTEÇÃO CONTRA RESET ===
+-- Este loop garante que a velocidade seja mantida mesmo que o jogo tente alterá-la
+RunService.Stepped:Connect(function()
+    local hum = getHum()
+    if hum and CONFIG.WalkSpeed > 16 then
+        -- Verifica se a velocidade foi alterada pelo jogo
+        if hum.WalkSpeed ~= CONFIG.WalkSpeed then
+            -- Reaplica a velocidade
+            hum.WalkSpeed = CONFIG.WalkSpeed
+        end
+    end
+    
+    -- Mantém a velocidade do fly consistente
+    local root = getRoot()
+    if root and CONFIG.Fly then
+        local bv = root:FindFirstChild("BodyVelocity")
+        if bv and bv.Velocity.Magnitude > 0 then
+            -- Mantém a velocidade do fly
+            bv.Velocity = bv.Velocity.Unit * CONFIG.FlySpeed
+        end
+    end
 end)
 
 -- === LOOPS DE FUNDO ===
