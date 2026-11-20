@@ -12,22 +12,40 @@ if not success or not Rayfield then
     return
 end
 
--- 🔵 3. SERVIÇOS COM PCALL (evita nil)
+-- 🔵 3. SERVIÇOS COM VERIFICAÇÃO COMPLETA
 local function GetService(name)
     local ok, service = pcall(function() return game:GetService(name) end)
     return ok and service or nil
 end
 
-local Players       = GetService("Players")
-local RunService    = GetService("RunService")
-local UserInputService = GetService("UserInputService")
-local Lighting      = GetService("Lighting")
-local VirtualUser   = GetService("VirtualUser")
-local TeleportService = GetService("TeleportService")
-local HttpService   = GetService("HttpService")
-local Workspace     = GetService("Workspace")
-local PhysicsService = GetService("PhysicsService") -- 🔵 CORREÇÃO: Adicionado
+-- Lista completa de serviços com verificação
+local Services = {}
+local ServiceNames = {
+    "Players", "RunService", "UserInputService", "Lighting", 
+    "VirtualUser", "TeleportService", "HttpService", "Workspace",
+    "PhysicsService", "ReplicatedStorage", "StarterPlayer", 
+    "ContextActionService", "GuiService", "Teams", "Players"
+}
 
+for _, name in ipairs(ServiceNames) do
+    Services[name] = GetService(name)
+end
+
+local Players = Services.Players
+local RunService = Services.RunService
+local UserInputService = Services.UserInputService
+local Lighting = Services.Lighting
+local VirtualUser = Services.VirtualUser
+local TeleportService = Services.TeleportService
+local HttpService = Services.HttpService
+local Workspace = Services.Workspace
+local PhysicsService = Services.PhysicsService
+local ReplicatedStorage = Services.ReplicatedStorage
+local StarterPlayer = Services.StarterPlayer
+local ContextActionService = Services.ContextActionService
+local GuiService = Services.GuiService
+
+-- Verificação de serviços essenciais
 if not Players or not RunService then
     warn("[Universal Hub] Serviços essenciais ausentes. Abortando.")
     return
@@ -36,7 +54,7 @@ end
 local player = Players.LocalPlayer
 if not player then return end
 
--- 🔵 4. UTILITÁRIOS DE SEGURANÇA
+-- 🔵 4. UTILITÁRIOS DE SEGURANÇA COMPLETOS
 local function SafeGet(obj, prop)
     if not obj then return nil end
     local ok, value = pcall(function() return obj[prop] end)
@@ -63,37 +81,70 @@ end
 
 local function GetHumanoid(char)
     if not char then return nil end
-    return char:FindFirstChildOfClass("Humanoid")
+    -- Tentativa múltipla para diferentes tipos de humanoid
+    return char:FindFirstChildOfClass("Humanoid") or 
+           char:FindFirstChild("Humanoid") or
+           char:FindFirstChild("HumanoidController")
 end
 
 local function GetRootPart(char)
     if not char then return nil end
-    return char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso")
+    -- Tentativa múltipla para diferentes tipos de root parts
+    return char:FindFirstChild("HumanoidRootPart") or 
+           char:FindFirstChild("Torso") or
+           char:FindFirstChild("UpperTorso") or
+           char:FindFirstChild("Head") or
+           char:FindFirstChild("RootPart") or
+           char:FindFirstChild("PrimaryPart")
 end
 
--- 🔵 5. SISTEMA MAID (limpeza automática)
+-- 🔵 5. SISTEMA MAID MELHORADO
 local Maid = {}
 Maid.__index = Maid
 function Maid.new() return setmetatable({_tasks = {}}, Maid) end
+
 function Maid:GiveTask(task)
     if not task then return end
-    table.insert(self._tasks, task)
-    return task
+    
+    -- Tratamento para diferentes tipos de task
+    if typeof(task) == "RBXScriptConnection" then
+        table.insert(self._tasks, task)
+        return task
+    elseif typeof(task) == "Instance" then
+        table.insert(self._tasks, task)
+        return task
+    elseif type(task) == "function" then
+        table.insert(self._tasks, task)
+        return task
+    elseif type(task) == "table" and task.Cleanup then
+        table.insert(self._tasks, task)
+        return task
+    else
+        warn("[Maid] Tipo de task não suportado: " .. typeof(task))
+        return nil
+    end
 end
+
 function Maid:Cleanup()
     for _, task in ipairs(self._tasks) do
         SafeCall(function()
-            if typeof(task) == "RBXScriptConnection" then task:Disconnect()
-            elseif typeof(task) == "Instance" then task:Destroy()
-            elseif type(task) == "function" then task()
-            elseif type(task) == "table" and task.Cleanup then task:Cleanup() end
+            if typeof(task) == "RBXScriptConnection" then
+                task:Disconnect()
+            elseif typeof(task) == "Instance" then
+                task:Destroy()
+            elseif type(task) == "function" then
+                task()
+            elseif type(task) == "table" and task.Cleanup then
+                task:Cleanup()
+            end
         end)
     end
     self._tasks = {}
 end
 
--- 🔵 6. CONFIGURAÇÃO CENTRAL
+-- 🔵 6. CONFIGURAÇÃO CENTRAL COM VALORES PADRÃO
 local CONFIG = {
+    -- Configurações básicas
     WalkSpeed = 16,
     JumpPower = 50,
     Gravity = 196.2,
@@ -116,6 +167,18 @@ local CONFIG = {
     VelocidadeGlobal = 1000,
     AplicarVelocidade = false,
     LimiteVelocidade = 500,
+    
+    -- Configurações extras para diferentes tipos de jogo
+    AutoFarm = false,
+    AutoHeal = false,
+    SpeedHack = false,
+    NoClipMode = "CollisionGroup",
+    FlyMode = "Constraints",
+    AntiKick = false,
+    AutoRejoin = false,
+    ServerHopInterval = 300,
+    DebugMode = false, -- Para debug
+    
     -- Internos
     _Connections = Maid.new(),
     _FlyObjects = Maid.new(),
@@ -123,17 +186,27 @@ local CONFIG = {
     _FreeCamCFrame = nil
 }
 
--- 🔵 7. SALVAR / CARREGAR CONFIGURAÇÕES
-local CONFIG_PATH = "UniversalHub_Config_" .. game.GameId .. ".json" -- 🔵 CORREÇÃO: Nome único por jogo
+-- 🔵 7. SALVAR / CARREGAR CONFIGURAÇÕES COM TRATAMENTO DE ERRO
+local CONFIG_PATH = "UniversalHub_Config_" .. game.GameId .. ".json"
 
 local function saveConfig()
     local success, err = pcall(function()
-        local data = HttpService:JSONEncode(CONFIG)
+        -- Remove propriedades internas antes de salvar
+        local saveData = {}
+        for k, v in pairs(CONFIG) do
+            if not k:find("_") then -- Não salva propriedades que começam com _
+                saveData[k] = v
+            end
+        end
+        local data = HttpService:JSONEncode(saveData)
         writefile(CONFIG_PATH, data)
         return true
     end)
+    
     if success then
-        Rayfield:Notify("Configurações salvas!", 3, "SUCCESS")
+        if CONFIG.DebugMode then
+            Rayfield:Notify("Configurações salvas!", 3, "SUCCESS")
+        end
     else
         Rayfield:Notify("Erro ao salvar: " .. tostring(err), 3, "ERROR")
     end
@@ -147,33 +220,41 @@ local function loadConfig()
         end
         return nil
     end)
+    
     if success and data then
         for k, v in pairs(data) do
             CONFIG[k] = v
         end
-        Rayfield:Notify("Configurações carregadas!", 3, "SUCCESS")
+        if CONFIG.DebugMode then
+            Rayfield:Notify("Configurações carregadas!", 3, "SUCCESS")
+        end
         return true
     end
     return false
 end
 
--- 🔵 8. FUNÇÕES CORE CORRIGIDAS
+-- 🔵 8. FUNÇÕES CORE COM TRATAMENTO DE ERRO COMPLETO
 
 -- 8.1 Aplicar Velocidade
 local function ApplySpeed()
-    local hum = GetHumanoid(player.Character)
+    local char = player.Character
+    if not char then return end
+    
+    local hum = GetHumanoid(char)
     if not hum then return end
-
+    
     local target = CONFIG.AplicarVelocidade and CONFIG.VelocidadeGlobal or CONFIG.WalkSpeed
     target = math.clamp(target, 0, CONFIG.LimiteVelocidade)
-
+    
     SafeCall(function() hum.WalkSpeed = target end)
-
+    
     -- Loop de proteção
     local conn = RunService.Heartbeat:Connect(function()
-        local currentHum = GetHumanoid(player.Character)
+        local currentChar = player.Character
+        if not currentChar then return end
+        local currentHum = GetHumanoid(currentChar)
         if not currentHum then return end
-
+        
         if CONFIG.AplicarVelocidade then
             if currentHum.WalkSpeed ~= CONFIG.VelocidadeGlobal then
                 currentHum.WalkSpeed = CONFIG.VelocidadeGlobal
@@ -200,11 +281,13 @@ end
 -- 8.3 Aplicar Gravidade
 local function ApplyGravity()
     SafeCall(function()
-        Workspace.GlobalGravity = CONFIG.Gravity
+        if Workspace then
+            Workspace.GlobalGravity = CONFIG.Gravity
+        end
     end)
 end
 
--- 8.4 Fly via Constraints (CORREÇÃO: Verificação de PhysicsService)
+-- 8.4 Fly - Múltiplos modos com tratamento de erro
 local function ToggleFly(enabled)
     CONFIG.Fly = enabled
     local hum = GetHumanoid(player.Character)
@@ -219,70 +302,121 @@ local function ToggleFly(enabled)
 
     SafeCall(function() hum.PlatformStand = true end)
 
-    -- Attachment
-    local attachment = Instance.new("Attachment")
-    attachment.Name = "FlyAttachment"
-    maid:GiveTask(attachment)
-    attachment.Parent = root
+    -- MODO 1: Constraints (LinearVelocity + AlignOrientation)
+    if CONFIG.FlyMode == "Constraints" then
+        local attachment = Instance.new("Attachment")
+        attachment.Name = "FlyAttachment"
+        maid:GiveTask(attachment)
+        attachment.Parent = root
 
-    -- LinearVelocity
-    local lv = Instance.new("LinearVelocity")
-    lv.Name = "FlyVelocity"
-    lv.Attachment0 = attachment
-    lv.MaxForce = math.huge
-    lv.VelocityConstraintMode = Enum.VelocityConstraintMode.Vector
-    lv.VectorVelocity = Vector3.zero
-    maid:GiveTask(lv)
-    lv.Parent = root
+        local lv = Instance.new("LinearVelocity")
+        lv.Name = "FlyVelocity"
+        lv.Attachment0 = attachment
+        lv.MaxForce = math.huge
+        lv.VelocityConstraintMode = Enum.VelocityConstraintMode.Vector
+        lv.VectorVelocity = Vector3.zero
+        maid:GiveTask(lv)
+        lv.Parent = root
 
-    -- AlignOrientation
-    local ao = Instance.new("AlignOrientation")
-    ao.Name = "FlyGyro"
-    ao.Attachment0 = attachment
-    ao.Mode = Enum.OrientationAlignmentMode.OneAttachment
-    ao.RigidityEnabled = true
-    ao.MaxTorque = math.huge
-    maid:GiveTask(ao)
-    ao.Parent = root
+        local ao = Instance.new("AlignOrientation")
+        ao.Name = "FlyGyro"
+        ao.Attachment0 = attachment
+        ao.Mode = Enum.OrientationAlignmentMode.OneAttachment
+        ao.RigidityEnabled = true
+        ao.MaxTorque = math.huge
+        maid:GiveTask(ao)
+        ao.Parent = root
 
-    -- Loop de controle
-    local flyConn = RunService.Heartbeat:Connect(function()
-        if not CONFIG.Fly or not root.Parent or not hum.Parent then
-            ToggleFly(false)
-            return
-        end
+        local flyConn = RunService.Heartbeat:Connect(function()
+            if not CONFIG.Fly or not root.Parent or not hum.Parent then
+                ToggleFly(false)
+                return
+            end
 
-        local cam = Workspace.CurrentCamera
-        if not cam then return end
-        SafeCall(function() ao.CFrame = cam.CFrame end)
+            local cam = Workspace.CurrentCamera
+            if not cam then return end
+            SafeCall(function() ao.CFrame = cam.CFrame end)
 
-        local moveDir = hum.MoveDirection
-        local speed = CONFIG.AplicarVelocidade and CONFIG.VelocidadeGlobal or CONFIG.FlySpeed
-        local vSpeed = CONFIG.FlyVerticalSpeed
+            local moveDir = hum.MoveDirection
+            local speed = CONFIG.AplicarVelocidade and CONFIG.VelocidadeGlobal or CONFIG.FlySpeed
+            local vSpeed = CONFIG.FlyVerticalSpeed
 
-        local targetVel = Vector3.zero
-        if moveDir.Magnitude > 0 then
-            local camLook = Vector3.new(cam.CFrame.LookVector.X, 0, cam.CFrame.LookVector.Z).Unit
-            local camRight = Vector3.new(cam.CFrame.RightVector.X, 0, cam.CFrame.RightVector.Z).Unit
-            targetVel = (camLook * moveDir.Z + camRight * moveDir.X) * speed
-        end
+            local targetVel = Vector3.zero
+            if moveDir.Magnitude > 0 then
+                local camLook = Vector3.new(cam.CFrame.LookVector.X, 0, cam.CFrame.LookVector.Z).Unit
+                local camRight = Vector3.new(cam.CFrame.RightVector.X, 0, cam.CFrame.RightVector.Z).Unit
+                targetVel = (camLook * moveDir.Z + camRight * moveDir.X) * speed
+            end
 
-        if UserInputService:IsKeyDown(Enum.KeyCode.Space) or UserInputService:IsKeyDown(Enum.KeyCode.ButtonA) then
-            targetVel = targetVel + Vector3.new(0, vSpeed, 0)
-        elseif UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) or UserInputService:IsKeyDown(Enum.KeyCode.ButtonL2) then
-            targetVel = targetVel - Vector3.new(0, vSpeed, 0)
-        end
+            if UserInputService:IsKeyDown(Enum.KeyCode.Space) or UserInputService:IsKeyDown(Enum.KeyCode.ButtonA) then
+                targetVel = targetVel + Vector3.new(0, vSpeed, 0)
+            elseif UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) or UserInputService:IsKeyDown(Enum.KeyCode.ButtonL2) then
+                targetVel = targetVel - Vector3.new(0, vSpeed, 0)
+            end
 
-        SafeCall(function() lv.VectorVelocity = targetVel end)
-    end)
-    maid:GiveTask(flyConn)
+            SafeCall(function() lv.VectorVelocity = targetVel end)
+        end)
+        maid:GiveTask(flyConn)
+    
+    -- MODO 2: BodyVelocity (compatível com jogos mais antigos)
+    else
+        local bv = Instance.new("BodyVelocity")
+        bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+        bv.Velocity = Vector3.zero
+        maid:GiveTask(bv)
+        bv.Parent = root
+        
+        local bg = Instance.new("BodyGyro")
+        bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+        bg.P = 9e4
+        maid:GiveTask(bg)
+        bg.Parent = root
+        
+        local flyConn = RunService.Heartbeat:Connect(function()
+            if not CONFIG.Fly or not root.Parent or not hum.Parent then
+                ToggleFly(false)
+                return
+            end
+            
+            local cam = Workspace.CurrentCamera
+            if not cam then return end
+            bg.CFrame = cam.CFrame
+            
+            local moveDir = hum.MoveDirection
+            local speed = CONFIG.AplicarVelocidade and CONFIG.VelocidadeGlobal or CONFIG.FlySpeed
+            local vSpeed = CONFIG.FlyVerticalSpeed
+            
+            local targetVel = Vector3.zero
+            if moveDir.Magnitude > 0 then
+                local camLook = cam.CFrame.LookVector
+                local camRight = cam.CFrame.RightVector
+                local flatForward = Vector3.new(camLook.X, 0, camLook.Z).Unit
+                local flatRight = Vector3.new(camRight.X, 0, camRight.Z).Unit
+                
+                local forwardAmount = moveDir:Dot(flatForward)
+                local rightAmount = moveDir:Dot(flatRight)
+                
+                local finalDir = (camLook * forwardAmount) + (camRight * rightAmount)
+                targetVel = finalDir * speed
+            end
+            
+            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+                targetVel = targetVel + Vector3.new(0, vSpeed, 0)
+            elseif UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+                targetVel = targetVel - Vector3.new(0, vSpeed, 0)
+            end
+            
+            bv.Velocity = targetVel
+        end)
+        maid:GiveTask(flyConn)
+    end
 end
 
--- 8.5 Noclip via CollisionGroups (CORREÇÃO: Verificação do PhysicsService)
+-- 8.5 Noclip - Múltiplos modos com tratamento de erro
 local NoclipGroupName = "UniversalHub_NoclipGroup_" .. game.GameId
 
 local function SetupNoclipPhysics()
-    if not PhysicsService then return end -- 🔵 CORREÇÃO: Se não houver PhysicsService, ignora
+    if not PhysicsService then return false end
     if not Workspace:FindFirstChild(NoclipGroupName) then
         local group = Instance.new("CollisionGroup")
         group.Name = NoclipGroupName
@@ -290,6 +424,7 @@ local function SetupNoclipPhysics()
         PhysicsService:CollisionGroupSetCollidable(NoclipGroupName, "Default", false)
         PhysicsService:CollisionGroupSetCollidable(NoclipGroupName, NoclipGroupName, false)
     end
+    return true
 end
 
 local function ToggleNoclip(enabled)
@@ -297,19 +432,42 @@ local function ToggleNoclip(enabled)
     local char = player.Character
     if not char then return end
 
-    if PhysicsService then SetupNoclipPhysics() end
-
-    for _, part in ipairs(char:GetDescendants()) do
-        if part:IsA("BasePart") then
-            if PhysicsService then
-                SafeCall(function() part.CollisionGroup = enabled and NoclipGroupName or "Default" end)
-            else
-                -- Fallback: usa CanCollide se não houver PhysicsService
-                SafeCall(function() part.CanCollide = not enabled end)
+    -- MODO 1: CollisionGroup
+    if CONFIG.NoClipMode == "CollisionGroup" and PhysicsService then
+        if SetupNoclipPhysics() then
+            for _, part in ipairs(char:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    SafeCall(function() part.CollisionGroup = enabled and NoclipGroupName or "Default" end)
+                end
             end
+            
+            if enabled then
+                local noclipConn = RunService.Stepped:Connect(function()
+                    if not CONFIG.Noclip then
+                        noclipConn:Disconnect()
+                        return
+                    end
+                    local curChar = player.Character
+                    if not curChar then return end
+                    for _, part in ipairs(curChar:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                            SafeCall(function() part.CollisionGroup = NoclipGroupName end)
+                        end
+                    end
+                end)
+                CONFIG._Connections:GiveTask(noclipConn)
+            end
+            return
         end
     end
-
+    
+    -- MODO 2: CanCollide (fallback)
+    for _, part in ipairs(char:GetDescendants()) do
+        if part:IsA("BasePart") then
+            SafeCall(function() part.CanCollide = not enabled end)
+        end
+    end
+    
     if enabled then
         local noclipConn = RunService.Stepped:Connect(function()
             if not CONFIG.Noclip then
@@ -320,11 +478,7 @@ local function ToggleNoclip(enabled)
             if not curChar then return end
             for _, part in ipairs(curChar:GetDescendants()) do
                 if part:IsA("BasePart") then
-                    if PhysicsService then
-                        SafeCall(function() part.CollisionGroup = NoclipGroupName end)
-                    else
-                        SafeCall(function() part.CanCollide = false end)
-                    end
+                    SafeCall(function() part.CanCollide = false end)
                 end
             end
         end)
@@ -332,7 +486,7 @@ local function ToggleNoclip(enabled)
     end
 end
 
--- 8.6 ESP (Highlight)
+-- 8.6 ESP - Com tratamento de erro
 local function ToggleESP(enabled)
     CONFIG.ESP = enabled
     local maid = CONFIG._ESPObjects
@@ -344,6 +498,10 @@ local function ToggleESP(enabled)
         if plr == player then return end
         local char = plr.Character
         if not char then return end
+        
+        local root = GetRootPart(char)
+        if not root then return end
+        
         local hl = char:FindFirstChild("UniversalESP_Highlight")
         if not hl then
             hl = Instance.new("Highlight")
@@ -355,8 +513,17 @@ local function ToggleESP(enabled)
             hl.Parent = char
             maid:GiveTask(hl)
         end
-        SafeCall(function() hl.FillColor = plr.TeamColor.Color end)
-        SafeCall(function() hl.OutlineColor = Color3.new(1,1,1) end)
+        
+        SafeCall(function()
+            if plr.TeamColor then
+                hl.FillColor = plr.TeamColor.Color
+            elseif plr.Team then
+                hl.FillColor = plr.TeamColor.Color
+            else
+                hl.FillColor = Color3.new(1, 0, 0)
+            end
+            hl.OutlineColor = Color3.new(1, 1, 1)
+        end)
     end
 
     for _, p in ipairs(Players:GetPlayers()) do
@@ -366,14 +533,7 @@ local function ToggleESP(enabled)
     local espConn = Players.PlayerAdded:Connect(function(newPlayer)
         newPlayer.CharacterAdded:Connect(function(char)
             if not CONFIG.ESP then return end
-            local hl = Instance.new("Highlight")
-            hl.Name = "UniversalESP_Highlight"
-            hl.FillTransparency = 0.5
-            hl.OutlineTransparency = 0
-            hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-            hl.Adornee = char
-            hl.Parent = char
-            maid:GiveTask(hl)
+            applyESP(newPlayer)
         end)
     end)
     maid:GiveTask(espConn)
@@ -487,7 +647,9 @@ local function OnCharacterAdded(char)
 
     -- Espera componentes vitais
     local hum = WaitForChildSafe(char, "Humanoid", 10)
-    local root = WaitForChildSafe(char, "HumanoidRootPart", 10) or WaitForChildSafe(char, "Torso", 10)
+    local root = WaitForChildSafe(char, "HumanoidRootPart", 10) or 
+                 WaitForChildSafe(char, "Torso", 10) or 
+                 WaitForChildSafe(char, "Head", 10)
     if not hum or not root then return end
 
     -- Reaplica config salva
@@ -515,7 +677,7 @@ local function OnCharacterAdded(char)
     char.DescendantAdded:Connect(function(desc)
         if CONFIG.Noclip and desc:IsA("BasePart") then
             task.wait()
-            if PhysicsService then
+            if CONFIG.NoClipMode == "CollisionGroup" and PhysicsService then
                 SafeCall(function() desc.CollisionGroup = NoclipGroupName end)
             else
                 SafeCall(function() desc.CanCollide = false end)
