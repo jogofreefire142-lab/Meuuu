@@ -1,16 +1,14 @@
--- 🍎 SCRIPT UNIVERSAL COM RAYFIELD UI
--- Aba Player Completa com todas as opções
-
 -- Carregar Rayfield UI
-local Rayfield = loadstring(game:HttpGet("https://raw.githubusercontent.com/Dimetric/Rayfield/main/Source.lua"))()
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 -- Serviços
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-local Workspace = game:GetService("Workspace")
 local Lighting = game:GetService("Lighting")
-local Camera = Workspace.CurrentCamera
+local VirtualUser = game:GetService("VirtualUser")
+local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
 
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
@@ -19,232 +17,418 @@ local humanoid = character:WaitForChild("Humanoid")
 
 -- Configurações
 local CONFIG = {
-    WalkSpeed = 50,
-    JumpPower = 100,
-    FlySpeed = 50,
-    FOV = 70,
-    ESP = false,
-    Fly = false,
-    Noclip = false,
-    AntiAFK = false,
-    Fullbright = false,
+    WalkSpeed = 16,
+    JumpPower = 50,
+    Gravity = 1,
     InfiniteJump = false,
-    KeySystem = false -- Altere para true se quiser usar Key System
+    Noclip = false,
+    Spin = false,
+    Sit = false,
+    Fly = false,
+    FlySpeed = 50,
+    ESP = false,
+    Fullbright = false,
+    NoFog = false,
+    FOV = 70,
+    FreeCam = false,
+    AntiAFK = false,
+    Rejoin = false,
+    ServerHop = false
 }
 
--- Criar Rayfield Window
+-- Funções seguras
+local function getHum()
+    local char = player.Character
+    return char and char:FindFirstChildOfClass("Humanoid")
+end
+
+local function getRoot()
+    local char = player.Character
+    return char and char:FindFirstChild("HumanoidRootPart")
+end
+
+-- Criar Janela Rayfield
 local Window = Rayfield:CreateWindow({
-    Name = "🍎 Script Universal",
-    Theme = "Dark", -- Dark, Light, Night
-    KeySystem = CONFIG.KeySystem,
-    Key = "1234", -- Senha (altere conforme necessário)
-    KeyName = "Chave" -- Texto que aparecerá
+    Name = "Script Universal - Player",
+    LoadingTitle = "Carregando Menu...",
+    LoadingSubtitle = "Aba Player Completa",
+    ConfigurationSaving = { Enabled = true },
+    KeySystem = false
 })
 
 -- Aba Player
-local PlayerTab = Window:CreateTab("Player", "👤")
+local PlayerTab = Window:CreateTab("Player", 4483362458)
 
--- Seção Movimentação
-local MovementSection = PlayerTab:CreateSection("Movimentação")
+-- === 1. MOVIMENTAÇÃO E FÍSICA ===
+PlayerTab:CreateSection("🏃 Movimentação e Física")
 
--- WalkSpeed Slider
-MovementSection:CreateSlider("WalkSpeed", "Velocidade de Caminhada", 50, 200, 1, CONFIG.WalkSpeed, function(value)
-    CONFIG.WalkSpeed = value
-    humanoid.WalkSpeed = value
-end)
+PlayerTab:CreateSlider({
+    Name = "WalkSpeed (Velocidade)",
+    Range = {16, 250},
+    Increment = 1,
+    CurrentValue = 16,
+    Callback = function(Value)
+        CONFIG.WalkSpeed = Value
+        local hum = getHum()
+        if hum then hum.WalkSpeed = Value end
+    end,
+})
 
--- JumpPower Slider
-MovementSection:CreateSlider("JumpPower", "Força do Pulo", 50, 200, 1, CONFIG.JumpPower, function(value)
-    CONFIG.JumpPower = value
-    humanoid.JumpPower = value
-end)
+PlayerTab:CreateSlider({
+    Name = "JumpPower (Força do Pulo)",
+    Range = {50, 300},
+    Increment = 1,
+    CurrentValue = 50,
+    Callback = function(Value)
+        CONFIG.JumpPower = Value
+        local hum = getHum()
+        if hum then
+            hum.UseJumpPower = true
+            hum.JumpPower = Value
+        end
+    end,
+})
 
--- Fly Toggle
-MovementSection:CreateToggle("Fly", "Voar", CONFIG.Fly, function(toggle)
-    CONFIG.Fly = toggle
-    if toggle then
-        -- Configurar voo
-        local bodyVelocity = Instance.new("BodyVelocity")
-        bodyVelocity.MaxForce = Vector3.new(40000, 40000, 40000)
-        bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-        bodyVelocity.Parent = humanoidRootPart
+PlayerTab:CreateSlider({
+    Name = "Gravidade",
+    Range = {0.1, 5},
+    Increment = 0.1,
+    CurrentValue = 1,
+    Callback = function(Value)
+        CONFIG.Gravity = Value
+        workspace.GlobalGravity = Value * 196.2
+    end,
+})
+
+PlayerTab:CreateToggle({
+    Name = "Infinite Jump (Pulo Infinito)",
+    CurrentValue = false,
+    Callback = function(Value)
+        CONFIG.InfiniteJump = Value
+    end,
+})
+
+PlayerTab:CreateToggle({
+    Name = "Noclip (Atravessar Paredes)",
+    CurrentValue = false,
+    Callback = function(Value)
+        CONFIG.Noclip = Value
+    end,
+})
+
+PlayerTab:CreateToggle({
+    Name = "Spin (Girar Rápido)",
+    CurrentValue = false,
+    Callback = function(Value)
+        CONFIG.Spin = Value
+    end,
+})
+
+PlayerTab:CreateToggle({
+    Name = "Sit (Sentar)",
+    CurrentValue = false,
+    Callback = function(Value)
+        CONFIG.Sit = Value
+        local hum = getHum()
+        if hum and Value then
+            hum.Sit = true
+        elseif hum then
+            hum.Sit = false
+        end
+    end,
+})
+
+-- === 2. FLY (VOAR) ===
+PlayerTab:CreateSection("✈️ Fly (Voar)")
+
+PlayerTab:CreateToggle({
+    Name = "Ativar Fly (Mobile/PC)",
+    CurrentValue = false,
+    Callback = function(Value)
+        CONFIG.Fly = Value
+        local root = getRoot()
+        local hum = getHum()
         
-        local flyConnection
-        flyConnection = RunService.Heartbeat:Connect(function()
-            if not CONFIG.Fly then
-                bodyVelocity:Destroy()
-                flyConnection:Disconnect()
-                return
-            end
+        if Value and root and hum then
+            hum.PlatformStand = true
             
-            local direction = Vector3.new(0, 0, 0)
-            if UserInputService:IsKeyDown(Enum.KeyCode.W) then
-                direction = direction + Vector3.new(0, 0, 1)
-            end
-            if UserInputService:IsKeyDown(Enum.KeyCode.S) then
-                direction = direction + Vector3.new(0, 0, -1)
-            end
-            if UserInputService:IsKeyDown(Enum.KeyCode.D) then
-                direction = direction + Vector3.new(1, 0, 0)
-            end
-            if UserInputService:IsKeyDown(Enum.KeyCode.A) then
-                direction = direction + Vector3.new(-1, 0, 0)
-            end
-            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
-                direction = direction + Vector3.new(0, 1, 0)
-            end
+            local bv = Instance.new("BodyVelocity")
+            bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+            bv.Velocity = Vector3.zero
+            bv.Parent = root
             
-            bodyVelocity.Velocity = direction * CONFIG.FlySpeed
-        end)
-    end
-end)
-
--- Noclip Toggle
-MovementSection:CreateToggle("Noclip", "Atravessar Objetos", CONFIG.Noclip, function(toggle)
-    CONFIG.Noclip = toggle
-    if toggle then
-        spawn(function()
-            while CONFIG.Noclip do
-                for _, part in pairs(character:GetDescendants()) do
-                    if part:IsA("Part") or part:IsA("MeshPart") then
-                        part.CanCollide = false
-                    end
-                end
-                wait(0.1)
-            end
-        end)
-    end
-end)
-
--- Infinite Jump Toggle
-MovementSection:CreateToggle("InfiniteJump", "Pulo Infinito", CONFIG.InfiniteJump, function(toggle)
-    CONFIG.InfiniteJump = toggle
-    if toggle then
-        local jumpConnection
-        jumpConnection = UserInputService.JumpRequest:Connect(function()
-            if CONFIG.InfiniteJump then
-                humanoid.Jump = true
-            end
-        end)
-        
-        -- Desconectar quando desativado
-        spawn(function()
-            while CONFIG.InfiniteJump do
-                wait(1)
-            end
-            jumpConnection:Disconnect()
-        end)
-    end
-end)
-
--- Seção Visual
-local VisualSection = PlayerTab:CreateSection("Visual")
-
--- ESP Toggle
-VisualSection:CreateToggle("ESP", "Ver Jogadores (ESP)", CONFIG.ESP, function(toggle)
-    CONFIG.ESP = toggle
-    if toggle then
-        spawn(function()
-            while CONFIG.ESP do
-                for _, otherPlayer in pairs(Players:GetPlayers()) do
-                    if otherPlayer ~= player and otherPlayer.Character then
-                        local otherChar = otherPlayer.Character
-                        local otherRoot = otherChar:FindFirstChild("HumanoidRootPart")
+            local bg = Instance.new("BodyGyro")
+            bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+            bg.P = 9e4
+            bg.Parent = root
+            
+            task.spawn(function()
+                while CONFIG.Fly and root and root.Parent do
+                    local cam = workspace.CurrentCamera
+                    bg.CFrame = cam.CFrame
+                    
+                    local moveDir = hum.MoveDirection
+                    if moveDir.Magnitude > 0 then
+                        local camLook = cam.CFrame.LookVector
+                        local camRight = cam.CFrame.RightVector
+                        local flatForward = Vector3.new(camLook.X, 0, camLook.Z).Unit
+                        local flatRight = Vector3.new(camRight.X, 0, camRight.Z).Unit
                         
-                        if otherRoot then
-                            -- Criar highlight para ESP
-                            local highlight = otherChar:FindFirstChild("ESP_Highlight")
-                            if not highlight then
-                                highlight = Instance.new("Highlight")
-                                highlight.Name = "ESP_Highlight"
-                                highlight.Parent = otherChar
-                                highlight.FillColor = Color3.fromRGB(255, 0, 0)
-                                highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-                                highlight.FillTransparency = 0.5
-                            end
-                            highlight.Enabled = true
-                        end
+                        local forwardAmount = moveDir:Dot(flatForward)
+                        local rightAmount = moveDir:Dot(flatRight)
+                        
+                        local finalDir = (camLook * forwardAmount) + (camRight * rightAmount)
+                        bv.Velocity = finalDir * CONFIG.FlySpeed
+                    else
+                        bv.Velocity = Vector3.zero
                     end
+                    
+                    if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+                        bv.Velocity = bv.Velocity + Vector3.new(0, CONFIG.FlySpeed, 0)
+                    elseif UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+                        bv.Velocity = bv.Velocity - Vector3.new(0, CONFIG.FlySpeed, 0)
+                    end
+                    
+                    RunService.Heartbeat:Wait()
                 end
-                wait(1)
-            end
-        end)
-    end
-end)
+                
+                bv:Destroy()
+                bg:Destroy()
+                if getHum() then getHum().PlatformStand = false end
+            end)
+        end
+    end,
+})
 
--- Fullbright Toggle
-VisualSection:CreateToggle("Fullbright", "Brilho Máximo", CONFIG.Fullbright, function(toggle)
-    CONFIG.Fullbright = toggle
-    if toggle then
-        Lighting.Ambient = Color3.fromRGB(255, 255, 255)
-        Lighting.Brightness = 2
-    else
-        Lighting.Ambient = Color3.fromRGB(100, 100, 100)
-        Lighting.Brightness = 1
-    end
-end)
+PlayerTab:CreateSlider({
+    Name = "Velocidade do Fly",
+    Range = {10, 200},
+    Increment = 5,
+    CurrentValue = 50,
+    Callback = function(Value)
+        CONFIG.FlySpeed = Value
+    end,
+})
 
--- FOV Slider
-VisualSection:CreateSlider("FOV", "Campo de Visão", 50, 120, 1, CONFIG.FOV, function(value)
-    CONFIG.FOV = value
-    Camera.FieldOfView = value
-end)
+-- === 3. VISUAL E CÂMERA ===
+PlayerTab:CreateSection("👁️ Visual e Câmera")
 
--- Seção Proteção
-local ProtectionSection = PlayerTab:CreateSection("Proteção")
-
--- Anti-AFK Toggle
-ProtectionSection:CreateToggle("AntiAFK", "Anti-AFK", CONFIG.AntiAFK, function(toggle)
-    CONFIG.AntiAFK = toggle
-    if toggle then
-        spawn(function()
-            while CONFIG.AntiAFK do
-                -- Simular movimento para evitar AFK
-                if humanoidRootPart then
-                    local randomOffset = Vector3.new(math.random(-1, 1), 0, math.random(-1, 1))
-                    humanoidRootPart.CFrame = humanoidRootPart.CFrame * CFrame.new(randomOffset)
+PlayerTab:CreateToggle({
+    Name = "ESP Players (Ver Jogadores)",
+    CurrentValue = false,
+    Callback = function(Value)
+        CONFIG.ESP = Value
+        if not Value then
+            for _, p in pairs(Players:GetPlayers()) do
+                if p.Character and p.Character:FindFirstChild("ESP_Highlight") then
+                    p.Character.ESP_Highlight:Destroy()
                 end
-                wait(10)
             end
+        end
+    end,
+})
+
+PlayerTab:CreateToggle({
+    Name = "Fullbright (Brilho Máximo)",
+    CurrentValue = false,
+    Callback = function(Value)
+        CONFIG.Fullbright = Value
+        if Value then
+            Lighting.Brightness = 2
+            Lighting.ClockTime = 14
+            Lighting.FogEnd = 100000
+            Lighting.GlobalShadows = false
+        else
+            Lighting.GlobalShadows = true
+        end
+    end,
+})
+
+PlayerTab:CreateToggle({
+    Name = "No Fog (Sem Neblina)",
+    CurrentValue = false,
+    Callback = function(Value)
+        CONFIG.NoFog = Value
+        if Value then
+            Lighting.FogEnd = 100000
+        else
+            Lighting.FogEnd = 300
+        end
+    end,
+})
+
+PlayerTab:CreateSlider({
+    Name = "FOV (Campo de Visão)",
+    Range = {50, 120},
+    Increment = 1,
+    CurrentValue = 70,
+    Callback = function(Value)
+        CONFIG.FOV = Value
+        workspace.CurrentCamera.FieldOfView = Value
+    end,
+})
+
+PlayerTab:CreateToggle({
+    Name = "FreeCam (Câmera Livre)",
+    CurrentValue = false,
+    Callback = function(Value)
+        CONFIG.FreeCam = Value
+        if Value then
+            local cam = workspace.CurrentCamera
+            cam detach from character
+            cam.CFrame = CFrame.new(character.HumanoidRootPart.Position + Vector3.new(10, 10, 10))
+        else
+            workspace.CurrentCamera.Attachment = character.HumanoidRootPart
+        end
+    end,
+})
+
+-- === 4. JOGADORES E TELEPORTE ===
+PlayerTab:CreateSection("👥 Jogadores e Teleporte")
+
+-- Lista de jogadores
+local playerList = {}
+for _, p in pairs(Players:GetPlayers()) do
+    if p ~= player then
+        table.insert(playerList, p.Name)
+    end
+end
+
+-- Dropdown para selecionar jogador
+PlayerTab:CreateDropdown({
+    Name = "Selecionar Jogador",
+    Options = playerList,
+    CurrentOption = playerList[1] or "Nenhum",
+    Callback = function(Option)
+        -- Salvar opção
+    end,
+})
+
+-- Botão para teleportar para jogador
+PlayerTab:CreateButton({
+    Name = "Teleportar para Jogador",
+    Callback = function()
+        local targetName = playerList[1] -- Aqui você pode usar a opção selecionada
+        local targetPlayer = Players:FindFirstChild(targetName)
+        if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            local root = getRoot()
+            if root then
+                root.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame
+            end
+        end
+    end,
+})
+
+-- Botão para spectar jogador
+PlayerTab:CreateButton({
+    Name = "Assistir Jogador (Spectate)",
+    Callback = function()
+        local targetName = playerList[1]
+        local targetPlayer = Players:FindFirstChild(targetName)
+        if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            workspace.CurrentCamera.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame
+        end
+    end,
+})
+
+-- Botão de teleporte por clique
+PlayerTab:CreateButton({
+    Name = "Click/Touch TP (Teleporte por Clique)",
+    Callback = function()
+        -- Implementar teleporte por clique
+    end,
+})
+
+-- === 5. UTILIDADES E SERVIDOR ===
+PlayerTab:CreateSection("⚙️ Utilidades e Servidor")
+
+PlayerTab:CreateToggle({
+    Name = "Anti-AFK",
+    CurrentValue = false,
+    Callback = function(Value)
+        CONFIG.AntiAFK = Value
+    end,
+})
+
+PlayerTab:CreateButton({
+    Name = "Resetar Personagem",
+    Callback = function()
+        local hum = getHum()
+        if hum then hum.Health = 0 end
+    end,
+})
+
+PlayerTab:CreateButton({
+    Name = "Rejoin (Entrar de Novo)",
+    Callback = function()
+        CONFIG.Rejoin = true
+        TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, player)
+    end,
+})
+
+PlayerTab:CreateButton({
+    Name = "Server Hop (Trocar Servidor)",
+    Callback = function()
+        CONFIG.ServerHop = true
+        local servers = {}
+        local url = "https://api.roblox.com/games/" .. game.PlaceId .. "/servers?limit=100&sortOrder=Asc"
+        
+        local success, response = pcall(function()
+            return HttpService:GetAsync(url)
         end)
+        
+        if success and response then
+            local data = HttpService:JSONDecode(response)
+            for _, server in pairs(data.data) do
+                if server.id ~= game.JobId and server.playing < 50 then
+                    table.insert(servers, server.id)
+                end
+            end
+            
+            if #servers > 0 then
+                TeleportService:TeleportToPlaceInstance(game.PlaceId, servers[1], player)
+            end
+        end
+    end,
+})
+
+-- === LOOPS DE FUNDO ===
+
+-- Loop de Noclip
+RunService.Stepped:Connect(function()
+    local char = player.Character
+    if not char then return end
+    
+    if CONFIG.Noclip then
+        for _, part in pairs(char:GetDescendants()) do
+            if part:IsA("BasePart") and part.CanCollide then
+                part.CanCollide = false
+            end
+        end
+    end
+    
+    if CONFIG.Spin then
+        humanoidRootPart.CFrame = humanoidRootPart.CFrame * CFrame.Angles(0, math.rad(10), 0)
     end
 end)
 
--- Botão de Reset
-ProtectionSection:CreateButton("Resetar Personagem", "Mata o personagem atual", function()
-    if humanoid then
-        humanoid.Health = 0
+-- Infinite Jump
+UserInputService.JumpRequest:Connect(function()
+    if CONFIG.InfiniteJump then
+        local hum = getHum()
+        if hum then
+            hum:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
     end
 end)
 
--- Aba Visual (outros efeitos)
-local VisualTab = Window:CreateTab("Visual", "🎨")
-
--- Seção de Efeitos
-local EffectsSection = VisualTab:CreateSection("Efeitos Visuais")
-
--- Toggle para efeitos de partícula
-EffectsSection:CreateToggle("ParticleEffects", "Efeitos de Partícula", true, function(toggle)
-    -- Implementar efeitos de partícula conforme necessário
+-- Anti-AFK
+player.Idled:Connect(function()
+    if CONFIG.AntiAFK then
+        VirtualUser:CaptureController()
+        VirtualUser:ClickButton2(Vector2.new())
+    end
 end)
-
--- Seção de Configurações
-local SettingsTab = Window:CreateTab("Configurações", "⚙️")
-
--- Botão para salvar configurações
-SettingsTab:CreateButton("Salvas Configurações", "Salva as configurações atualizadas", function()
-    -- Implementar salvamento de configurações
-    Rayfield:Notify("Configurações salvas!", 5, "SUCCESS")
-end)
-
--- Botão para limpar configurações
-SettingsTab:CreateButton("Limpar Configurações", "Restaura as configurações padrão", function()
-    -- Implementar limpeza de configurações
-    Rayfield:Notify("Configurações restauradas!", 5, "SUCCESS")
-end)
-
--- Inicialização
-print("🍎 Script Universal carregado com Rayfield UI!")
 
 -- Notificação de sucesso
 Rayfield:Notify("Script carregado com sucesso!", 5, "SUCCESS")
