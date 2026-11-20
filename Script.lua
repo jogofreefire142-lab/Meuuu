@@ -11,9 +11,6 @@ local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
 
 local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-local humanoid = character:WaitForChild("Humanoid")
 
 -- Configurações
 local CONFIG = {
@@ -23,6 +20,7 @@ local CONFIG = {
     InfiniteJump = false,
     Noclip = false,
     Spin = false,
+    SpinSpeed = 10,
     Sit = false,
     Fly = false,
     FlySpeed = 50,
@@ -34,8 +32,45 @@ local CONFIG = {
     AntiAFK = false,
     Rejoin = false,
     ServerHop = false,
-    SelectedPlayer = "Nenhum"
+    SelectedPlayer = "Nenhum",
+    MaxSpeed = 1000,
+    Organize = false,
+    ClickTP = false
 }
+
+-- Caminho para salvar configurações
+local CONFIG_PATH = "ScriptUniversal_Config.json"
+
+-- Função para salvar configurações
+local function saveConfig()
+    local success, error = pcall(function()
+        local data = HttpService:JSONEncode(CONFIG)
+        writefile(CONFIG_PATH, data)
+    end)
+    if success then
+        Rayfield:Notify("Configurações salvas!", 3, "SUCCESS")
+    else
+        Rayfield:Notify("Erro ao salvar: " .. error, 3, "ERROR")
+    end
+end
+
+-- Função para carregar configurações
+local function loadConfig()
+    local success, data = pcall(function()
+        if isfile(CONFIG_PATH) then
+            local content = readfile(CONFIG_PATH)
+            return HttpService:JSONDecode(content)
+        end
+        return nil
+    end)
+    
+    if success and data then
+        for key, value in pairs(data) do
+            CONFIG[key] = value
+        end
+        Rayfield:Notify("Configurações carregadas!", 3, "SUCCESS")
+    end
+end
 
 -- Funções seguras
 local function getHum()
@@ -46,6 +81,94 @@ end
 local function getRoot()
     local char = player.Character
     return char and char:FindFirstChild("HumanoidRootPart")
+end
+
+-- Função para aplicar configurações
+local function applyConfig()
+    local hum = getHum()
+    local root = getRoot()
+    
+    if hum then
+        hum.WalkSpeed = CONFIG.WalkSpeed
+        hum.JumpPower = CONFIG.JumpPower
+        hum.UseJumpPower = true
+        
+        if CONFIG.Sit then
+            hum.Sit = true
+        end
+    end
+    
+    if root and CONFIG.Fly then
+        hum.PlatformStand = true
+        
+        local bv = Instance.new("BodyVelocity")
+        bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+        bv.Velocity = Vector3.zero
+        bv.Parent = root
+        
+        local bg = Instance.new("BodyGyro")
+        bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+        bg.P = 9e4
+        bg.Parent = root
+        
+        task.spawn(function()
+            while CONFIG.Fly and root and root.Parent do
+                local cam = workspace.CurrentCamera
+                bg.CFrame = cam.CFrame
+                
+                local moveDir = hum.MoveDirection
+                if moveDir.Magnitude > 0 then
+                    local camLook = cam.CFrame.LookVector
+                    local camRight = cam.CFrame.RightVector
+                    local flatForward = Vector3.new(camLook.X, 0, camLook.Z).Unit
+                    local flatRight = Vector3.new(camRight.X, 0, camRight.Z).Unit
+                    
+                    local forwardAmount = moveDir:Dot(flatForward)
+                    local rightAmount = moveDir:Dot(flatRight)
+                    
+                    local finalDir = (camLook * forwardAmount) + (camRight * rightAmount)
+                    bv.Velocity = finalDir * CONFIG.FlySpeed
+                else
+                    bv.Velocity = Vector3.zero
+                end
+                
+                if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+                    bv.Velocity = bv.Velocity + Vector3.new(0, CONFIG.FlySpeed, 0)
+                elseif UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+                    bv.Velocity = bv.Velocity - Vector3.new(0, CONFIG.FlySpeed, 0)
+                end
+                
+                RunService.Heartbeat:Wait()
+            end
+            
+            bv:Destroy()
+            bg:Destroy()
+            local currentHum = getHum()
+            if currentHum then currentHum.PlatformStand = false end
+        end)
+    end
+    
+    workspace.CurrentCamera.FieldOfView = CONFIG.FOV
+    
+    if CONFIG.Fullbright then
+        Lighting.Brightness = 2
+        Lighting.ClockTime = 14
+        Lighting.FogEnd = 100000
+        Lighting.GlobalShadows = false
+    else
+        Lighting.GlobalShadows = true
+    end
+    
+    if CONFIG.NoFog then
+        Lighting.FogEnd = 100000
+    else
+        Lighting.FogEnd = 300
+    end
+end
+
+-- Função para limitar velocidade
+local function limitSpeed(speed)
+    return math.min(speed, CONFIG.MaxSpeed)
 end
 
 -- Criar Janela Rayfield
@@ -64,14 +187,28 @@ local PlayerTab = Window:CreateTab("Player", 4483362458)
 PlayerTab:CreateSection("🏃 Movimentação e Física")
 
 PlayerTab:CreateSlider({
+    Name = "Velocidade Máxima",
+    Range = {16, 1000},
+    Increment = 1,
+    CurrentValue = 1000,
+    Callback = function(Value)
+        CONFIG.MaxSpeed = Value
+        CONFIG.WalkSpeed = limitSpeed(CONFIG.WalkSpeed)
+        CONFIG.FlySpeed = limitSpeed(CONFIG.FlySpeed)
+        local hum = getHum()
+        if hum then hum.WalkSpeed = CONFIG.WalkSpeed end
+    end,
+})
+
+PlayerTab:CreateSlider({
     Name = "WalkSpeed (Velocidade)",
-    Range = {16, 250},
+    Range = {16, 1000},
     Increment = 1,
     CurrentValue = 16,
     Callback = function(Value)
-        CONFIG.WalkSpeed = Value
+        CONFIG.WalkSpeed = limitSpeed(Value)
         local hum = getHum()
-        if hum then hum.WalkSpeed = Value end
+        if hum then hum.WalkSpeed = CONFIG.WalkSpeed end
     end,
 })
 
@@ -125,6 +262,16 @@ PlayerTab:CreateToggle({
     end,
 })
 
+PlayerTab:CreateSlider({
+    Name = "SpinSpeed (Velocidade do Giro)",
+    Range = {1, 50},
+    Increment = 1,
+    CurrentValue = 10,
+    Callback = function(Value)
+        CONFIG.SpinSpeed = Value
+    end,
+})
+
 PlayerTab:CreateToggle({
     Name = "Sit (Sentar)",
     CurrentValue = false,
@@ -147,67 +294,29 @@ PlayerTab:CreateToggle({
     CurrentValue = false,
     Callback = function(Value)
         CONFIG.Fly = Value
-        local root = getRoot()
-        local hum = getHum()
-        
-        if Value and root and hum then
-            hum.PlatformStand = true
-            
-            local bv = Instance.new("BodyVelocity")
-            bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-            bv.Velocity = Vector3.zero
-            bv.Parent = root
-            
-            local bg = Instance.new("BodyGyro")
-            bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
-            bg.P = 9e4
-            bg.Parent = root
-            
-            task.spawn(function()
-                while CONFIG.Fly and root and root.Parent do
-                    local cam = workspace.CurrentCamera
-                    bg.CFrame = cam.CFrame
-                    
-                    local moveDir = hum.MoveDirection
-                    if moveDir.Magnitude > 0 then
-                        local camLook = cam.CFrame.LookVector
-                        local camRight = cam.CFrame.RightVector
-                        local flatForward = Vector3.new(camLook.X, 0, camLook.Z).Unit
-                        local flatRight = Vector3.new(camRight.X, 0, camRight.Z).Unit
-                        
-                        local forwardAmount = moveDir:Dot(flatForward)
-                        local rightAmount = moveDir:Dot(flatRight)
-                        
-                        local finalDir = (camLook * forwardAmount) + (camRight * rightAmount)
-                        bv.Velocity = finalDir * CONFIG.FlySpeed
-                    else
-                        bv.Velocity = Vector3.zero
-                    end
-                    
-                    if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
-                        bv.Velocity = bv.Velocity + Vector3.new(0, CONFIG.FlySpeed, 0)
-                    elseif UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
-                        bv.Velocity = bv.Velocity - Vector3.new(0, CONFIG.FlySpeed, 0)
-                    end
-                    
-                    RunService.Heartbeat:Wait()
-                end
-                
-                bv:Destroy()
-                bg:Destroy()
-                if getHum() then getHum().PlatformStand = false end
-            end)
+        if Value then
+            applyConfig()
+        else
+            local root = getRoot()
+            if root then
+                local bv = root:FindFirstChild("BodyVelocity")
+                local bg = root:FindFirstChild("BodyGyro")
+                if bv then bv:Destroy() end
+                if bg then bg:Destroy() end
+                local hum = getHum()
+                if hum then hum.PlatformStand = false end
+            end
         end
     end,
 })
 
 PlayerTab:CreateSlider({
     Name = "Velocidade do Fly",
-    Range = {10, 200},
+    Range = {10, 1000},
     Increment = 5,
     CurrentValue = 50,
     Callback = function(Value)
-        CONFIG.FlySpeed = Value
+        CONFIG.FlySpeed = limitSpeed(Value)
     end,
 })
 
@@ -278,14 +387,9 @@ PlayerTab:CreateToggle({
         local root = getRoot()
         
         if Value and root then
-            -- Salvar posição atual da câmera
-            local originalCFrame = cam.CFrame
-            -- Posicionar a câmera em uma posição livre
             cam.CFrame = CFrame.new(root.Position + Vector3.new(10, 10, 10))
-            -- Desanexar a câmera do personagem
             cam.CameraSubject = nil
         else
-            -- Reanexar a câmera ao personagem
             local hum = getHum()
             if hum then
                 cam.CameraSubject = hum
@@ -346,22 +450,43 @@ PlayerTab:CreateButton({
     end,
 })
 
--- Botão de teleporte por clique
-PlayerTab:CreateButton({
+-- Toggle de Teleporte por Clique
+PlayerTab:CreateToggle({
     Name = "Click/Touch TP (Teleporte por Clique)",
-    Callback = function()
-        -- Implementar teleporte por clique
-        local mouse = player:GetMouse()
-        local targetPosition = mouse.Hit.Position
-        local root = getRoot()
-        if root then
-            root.CFrame = CFrame.new(targetPosition)
-        end
+    CurrentValue = false,
+    Callback = function(Value)
+        CONFIG.ClickTP = Value
     end,
 })
 
 -- === 5. UTILIDADES E SERVIDOR ===
 PlayerTab:CreateSection("⚙️ Utilidades e Servidor")
+
+-- Botão de Organizar
+PlayerTab:CreateButton({
+    Name = "Organizar",
+    Callback = function()
+        CONFIG.Organize = not CONFIG.Organize
+        Rayfield:Notify("Organização " .. (CONFIG.Organize and "ativada" or "desativada"), 3, "INFO")
+    end,
+})
+
+-- Botão para salvar configurações
+PlayerTab:CreateButton({
+    Name = "Salvas Configurações",
+    Callback = function()
+        saveConfig()
+    end,
+})
+
+-- Botão para carregar configurações
+PlayerTab:CreateButton({
+    Name = "Carregar Configurações",
+    Callback = function()
+        loadConfig()
+        applyConfig()
+    end,
+})
 
 PlayerTab:CreateToggle({
     Name = "Anti-AFK",
@@ -413,9 +538,15 @@ PlayerTab:CreateButton({
     end,
 })
 
+-- === GERENCIAMENTO DE RESPAWN ===
+player.CharacterAdded:Connect(function(newCharacter)
+    task.wait(0.5)
+    applyConfig()
+end)
+
 -- === LOOPS DE FUNDO ===
 
--- Loop de Noclip e Spin
+-- Loop de Noclip, Spin e FreeCam
 RunService.Stepped:Connect(function()
     local char = player.Character
     if not char then return end
@@ -431,7 +562,30 @@ RunService.Stepped:Connect(function()
     if CONFIG.Spin then
         local root = getRoot()
         if root then
-            root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(10), 0)
+            root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(CONFIG.SpinSpeed), 0)
+        end
+    end
+    
+    if CONFIG.FreeCam then
+        local cam = workspace.CurrentCamera
+        local moveSpeed = 50
+        if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+            cam.CFrame = cam.CFrame + cam.CFrame.LookVector * moveSpeed * RunService.HeartbeatWait
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+            cam.CFrame = cam.CFrame - cam.CFrame.LookVector * moveSpeed * RunService.HeartbeatWait
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+            cam.CFrame = cam.CFrame + cam.CFrame.RightVector * moveSpeed * RunService.HeartbeatWait
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+            cam.CFrame = cam.CFrame - cam.CFrame.RightVector * moveSpeed * RunService.HeartbeatWait
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+            cam.CFrame = cam.CFrame + Vector3.new(0, moveSpeed, 0) * RunService.HeartbeatWait
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+            cam.CFrame = cam.CFrame - Vector3.new(0, moveSpeed, 0) * RunService.HeartbeatWait
         end
     end
 end)
@@ -453,6 +607,43 @@ player.Idled:Connect(function()
         VirtualUser:ClickButton2(Vector2.new())
     end
 end)
+
+-- Teleporte por Clique
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if CONFIG.ClickTP and not gameProcessed then
+        if input.UserInputState == Enum.UserInputState.Begin then
+            local position
+            if input.UserInputType == Enum.UserInputType.Touch then
+                position = input.Position
+            else
+                local mouse = player:GetMouse()
+                position = mouse.Hit.Position
+            end
+            local root = getRoot()
+            if root then
+                root.CFrame = CFrame.new(position)
+            end
+        end
+    end
+end)
+
+-- Atualizar lista de jogadores
+task.spawn(function()
+    while task.wait(5) do
+        playerList = {}
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= player then
+                table.insert(playerList, p.Name)
+            end
+        end
+    end
+end)
+
+-- Aplicar configurações iniciais
+applyConfig()
+
+-- Carregar configurações salvas
+loadConfig()
 
 -- Notificação de sucesso
 Rayfield:Notify("Script carregado com sucesso!", 5, "SUCCESS")
