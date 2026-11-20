@@ -33,7 +33,8 @@ local CONFIG = {
     FreeCam = false,
     AntiAFK = false,
     Rejoin = false,
-    ServerHop = false
+    ServerHop = false,
+    SelectedPlayer = "Nenhum"
 }
 
 -- Funções seguras
@@ -273,12 +274,22 @@ PlayerTab:CreateToggle({
     CurrentValue = false,
     Callback = function(Value)
         CONFIG.FreeCam = Value
-        if Value then
-            local cam = workspace.CurrentCamera
-            cam detach from character
-            cam.CFrame = CFrame.new(character.HumanoidRootPart.Position + Vector3.new(10, 10, 10))
+        local cam = workspace.CurrentCamera
+        local root = getRoot()
+        
+        if Value and root then
+            -- Salvar posição atual da câmera
+            local originalCFrame = cam.CFrame
+            -- Posicionar a câmera em uma posição livre
+            cam.CFrame = CFrame.new(root.Position + Vector3.new(10, 10, 10))
+            -- Desanexar a câmera do personagem
+            cam.CameraSubject = nil
         else
-            workspace.CurrentCamera.Attachment = character.HumanoidRootPart
+            -- Reanexar a câmera ao personagem
+            local hum = getHum()
+            if hum then
+                cam.CameraSubject = hum
+            end
         end
     end,
 })
@@ -300,7 +311,7 @@ PlayerTab:CreateDropdown({
     Options = playerList,
     CurrentOption = playerList[1] or "Nenhum",
     Callback = function(Option)
-        -- Salvar opção
+        CONFIG.SelectedPlayer = Option
     end,
 })
 
@@ -308,12 +319,14 @@ PlayerTab:CreateDropdown({
 PlayerTab:CreateButton({
     Name = "Teleportar para Jogador",
     Callback = function()
-        local targetName = playerList[1] -- Aqui você pode usar a opção selecionada
-        local targetPlayer = Players:FindFirstChild(targetName)
-        if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            local root = getRoot()
-            if root then
-                root.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame
+        local targetName = CONFIG.SelectedPlayer
+        if targetName and targetName ~= "Nenhum" then
+            local targetPlayer = Players:FindFirstChild(targetName)
+            if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                local root = getRoot()
+                if root then
+                    root.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame
+                end
             end
         end
     end,
@@ -323,10 +336,12 @@ PlayerTab:CreateButton({
 PlayerTab:CreateButton({
     Name = "Assistir Jogador (Spectate)",
     Callback = function()
-        local targetName = playerList[1]
-        local targetPlayer = Players:FindFirstChild(targetName)
-        if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            workspace.CurrentCamera.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame
+        local targetName = CONFIG.SelectedPlayer
+        if targetName and targetName ~= "Nenhum" then
+            local targetPlayer = Players:FindFirstChild(targetName)
+            if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                workspace.CurrentCamera.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame
+            end
         end
     end,
 })
@@ -336,6 +351,12 @@ PlayerTab:CreateButton({
     Name = "Click/Touch TP (Teleporte por Clique)",
     Callback = function()
         -- Implementar teleporte por clique
+        local mouse = player:GetMouse()
+        local targetPosition = mouse.Hit.Position
+        local root = getRoot()
+        if root then
+            root.CFrame = CFrame.new(targetPosition)
+        end
     end,
 })
 
@@ -394,7 +415,7 @@ PlayerTab:CreateButton({
 
 -- === LOOPS DE FUNDO ===
 
--- Loop de Noclip
+-- Loop de Noclip e Spin
 RunService.Stepped:Connect(function()
     local char = player.Character
     if not char then return end
@@ -408,7 +429,10 @@ RunService.Stepped:Connect(function()
     end
     
     if CONFIG.Spin then
-        humanoidRootPart.CFrame = humanoidRootPart.CFrame * CFrame.Angles(0, math.rad(10), 0)
+        local root = getRoot()
+        if root then
+            root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(10), 0)
+        end
     end
 end)
 
