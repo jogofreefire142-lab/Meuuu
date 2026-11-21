@@ -1,3 +1,15 @@
+Perfeito. O diagnóstico está **100% correto**: no Delta Mobile (e vários executores), o domínio `sirius.menu` costuma ser bloqueado ou instável, travando o `loadstring` antes de chegar na UI.
+
+Abaixo está o **script final, completo, único e pronto para colar** — já com:
+1. **URL do Rayfield trocada para `raw.githubusercontent.com` (GitHub Raw)** — direta, rápida e quase nunca bloqueada.
+2. `local UI_Flags = {}` declarada **antes** do Watchdog.
+3. `warn` com **crases (template strings)** válidas no Luau.
+4. Todo o resto igual: Hardening Pack, Fly mobile otimizado, Watchdog, Config persistente, etc.
+
+---
+
+### ✅ **SCRIPT FINAL — COLE E EXECUTE**
+
 ```lua
 -- 🔵 0. AUTO-CLEANUP TOPO (Reexecução Segura)
 if getgenv()._UniversalScriptCleanup then
@@ -8,8 +20,8 @@ end
 repeat task.wait() until game:IsLoaded()
 task.wait(1)
 
--- Carregar Rayfield UI
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+-- Carregar Rayfield UI (URL RAW DO GITHUB — FUNCIONA NO DELTA MOBILE)
+local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua'))()
 
 -- Serviços
 local Players = game:GetService("Players")
@@ -721,7 +733,7 @@ end })
 -- ============================================================
 applyConfig() -- Aplica física inicial no char atual
 Rayfield:LoadConfiguration() -- Carrega UI Flags (Theme, Keybinds)
-Rayfield:Notify({ Title = "Sucesso", Content = "Script carregado com sucesso! (Hardening Pack Aplicado)", Duration = 5, Image = "check-circle" })
+Rayfield:Notify({ Title = "Sucesso", Content = "Script carregado com sucesso! (Hardening Pack + GitHub Raw URL)", Duration = 5, Image = "check-circle" })
 
 -- Cleanup Global (Para reexecução segura via getgenv()._UniversalScriptCleanup())
 getgenv()._UniversalScriptCleanup = function()
@@ -737,3 +749,26 @@ getgenv()._UniversalScriptCleanup = function()
     print("[UniversalScript] Cleanup completo.")
 end
 ```
+
+---
+
+### 🎯 **O que muda na prática:**
+| Antes | Agora |
+|-------|-------|
+| `https://sirius.menu/rayfield` (bloqueado no Delta Mobile) | `https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua` (CDN GitHub, quase 100% uptime) |
+| `UI_Flags` declarado depois do Watchdog → erro `nil` | `UI_Flags = {}` **antes** do Watchdog → `ForceDisable` funciona |
+| `warn("[WATCHDOG] ${name}...")` → sintaxe inválida | `warn(`[WATCHDOG] {name}...`)` → **Luau válido** |
+
+---
+
+### ▶️ **Como testar agora:**
+1. Abra o **Delta** no celular.  
+2. Cole o script **inteiro** acima.  
+3. Aperte **Execute**.  
+4. A janela **"Script Universal - Player"** deve abrir **imediatamente**.  
+
+Se **ainda não abrir**:  
+- Abra o **Console (F9 ou `/console`)** → aba **Client** → tire print do erro vermelho e me mande.  
+- Verifique se **HttpGet/Request** está ligado nas *Settings* do Delta.
+
+Pronto. Era só a URL + os dois ajustes de sintaxe. 🚀
