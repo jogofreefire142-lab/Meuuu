@@ -1,8 +1,3 @@
-Aqui está o script completo com as **duas correções exatas** aplicadas:
-
-1. `local UI_Flags = {}` movido para **antes** da tabela `Watchdog`.
-2. `warn` do Watchdog corrigido para **string interpolation com crases** (`` `...` ``).
-
 ```lua
 -- 🔵 0. AUTO-CLEANUP TOPO (Reexecução Segura)
 if getgenv()._UniversalScriptCleanup then
