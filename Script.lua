@@ -1,11 +1,11 @@
 -- 🔵 0. AUTO-CLEANUP TOPO
 if getgenv()._UniversalScriptCleanup then pcall(getgenv()._UniversalScriptCleanup) end
 
--- 🔵 1. LOAD & SERVICES (WAIT AUMENTADO PARA 3s)
+-- 🔵 1. LOAD & SERVICES (WAIT 3s PARA AUTO-EXECUTE DELTA MOBILE)
 repeat task.wait() until game:IsLoaded()
-task.wait(3) -- <<< CORREÇÃO: 3 segundos para Auto-Execute Delta Mobile
+task.wait(3)
 
--- Rayfield via GitHub Raw (confiável no Mobile)
+-- Rayfield via GitHub Raw
 local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua'))()
 
 local Players       = game:GetService("Players")
@@ -21,15 +21,75 @@ local camera = workspace.CurrentCamera
 local PlaceId = game.PlaceId
 
 -- ============================================================
--- 🛡️ EXECUTOR CAPABILITIES DETECTION (CORRIGIDO: SEM EXECUTAR HOOKS)
+-- 🛡️ EXECUTOR CAPABILITIES DETECTION (SEM EXECUTAR HOOKS)
 -- ============================================================
 local ExecutorCaps = {}
 ExecutorCaps.hasWriteFile  = pcall(function() writefile("__UniversalTestCap", "") delfile("__UniversalTestCap") end)
 ExecutorCaps.hasRequest    = pcall(function() HttpService:RequestAsync({Url="https://roblox.com", Method="GET"}) end)
--- CORREÇÃO: Apenas checa se a função existe (type == "function"), NÃO executa hookfunction(print) nem getrawmetatable(game)
 ExecutorCaps.hasHookFunc   = type(hookfunction) == "function"
 ExecutorCaps.hasGetRawMeta = type(getrawmetatable) == "function"
 ExecutorCaps.hasDrawing    = pcall(function() local d = Drawing.new("Line") d:Remove() end)
+
+-- ============================================================
+-- 📁 PASTA DEDICADA & CAMINHO DO CONFIG (MELHORIA 2)
+-- ============================================================
+local CONFIG_FOLDER = "UniversalLite_Configs"
+local CONFIG_PATH = CONFIG_FOLDER .. "/Config_" .. PlaceId .. ".json"
+
+pcall(function()
+    if not isfolder(CONFIG_FOLDER) then
+        makefolder(CONFIG_FOLDER)
+    end
+end)
+
+-- ============================================================
+-- ⚙️ CONFIG — TUDO FALSE POR PADRÃO (MELHORIA 1)
+-- ============================================================
+local CONFIG = {
+    -- Visuais
+    ESP = false, Fullbright = false, NoFog = false, FOV = 70,
+    -- Movimento
+    WalkSpeed = 16, JumpPower = 50, Gravity = 1, InfiniteJump = false, Spin = false, SpinSpeed = 10, Sit = false,
+    -- Perigosos
+    Fly = false, FlySpeed = 50, Noclip = false, ClickTP = false,
+    -- Utils
+    AntiAFK = false, AntiLag = false, Rejoin = false, ServerHop = false, SelectedPlayer = "Nenhum",
+    -- Velocidade Global
+    VelocidadeGlobal = 1000, AplicarVelocidade = false, LimiteVelocidade = 1000,
+    -- Interno Watchdog
+    _Flags = {}
+}
+
+-- ============================================================
+-- 💾 AUTO-SAVE / AUTO-LOAD (MELHORIA 3)
+-- ============================================================
+local function saveConfig()
+    local data = {}
+    for k, v in pairs(CONFIG) do
+        if type(v) ~= "function" and k:sub(1,1) ~= "_" then data[k] = v end
+    end
+    local json = HttpService:JSONEncode(data)
+    pcall(function()
+        writefile(CONFIG_PATH, json)
+    end)
+end
+
+local function loadConfig()
+    local success, data = pcall(function()
+        if isfile(CONFIG_PATH) then
+            return HttpService:JSONDecode(readfile(CONFIG_PATH))
+        end
+        return nil
+    end)
+    if success and data then
+        for k, v in pairs(data) do
+            if CONFIG[k] ~= nil then CONFIG[k] = v end
+        end
+        for k, v in pairs(CONFIG) do
+            if type(v) == "boolean" then CONFIG._Flags[k] = v end
+        end
+    end
+end
 
 -- ============================================================
 -- 🛡️ ANTI-KICK (BEST EFFORT)
@@ -43,7 +103,7 @@ pcall(function()
             mt.__namecall = newcclosure(function(self, ...)
                 if self == player and (getnamecallmethod() == "Kick" or getnamecallmethod() == "kick") then
                     warn("[ANTI-KICK] Blocked:", ...)
-                    Rayfield:Notify({Title="🛡️ Anti-Kick", Content="Kick bloqueado (metatable)", Duration=5, Image="shield"})
+                    if Rayfield and Rayfield.Notify then Rayfield:Notify({Title="🛡️ Anti-Kick", Content="Kick bloqueado (metatable)", Duration=5, Image="shield"}) end
                     return nil
                 end
                 return old(self, ...)
@@ -57,7 +117,7 @@ pcall(function()
         local OldKick = hookfunction(player.Kick, function(self, msg)
             if self == player then
                 warn("[ANTI-KICK] Blocked (hook):", msg)
-                Rayfield:Notify({Title="🛡️ Anti-Kick", Content="Kick bloqueado (hook)", Duration=5, Image="shield"})
+                if Rayfield and Rayfield.Notify then Rayfield:Notify({Title="🛡️ Anti-Kick", Content="Kick bloqueado (hook)", Duration=5, Image="shield"}) end
                 return
             end
             return OldKick(self, msg)
@@ -111,93 +171,80 @@ function Watchdog:ForceDisable(flagName, reason)
     if not CONFIG._Flags[flagName] then return end
     CONFIG._Flags[flagName] = false; CONFIG[flagName] = false
     if UI_Flags[flagName] then pcall(function() UI_Flags[flagName]:Set(false) end) end
-    Rayfield:Notify({Title="🛡️ WATCHDOG", Content=flagName.." desligado: "..reason, Duration=6, Image="alert-triangle"})
+    if Rayfield and Rayfield.Notify then Rayfield:Notify({Title="🛡️ WATCHDOG", Content=flagName.." desligado: "..reason, Duration=6, Image="alert-triangle"}) end
 end
 
 -- ============================================================
--- ⚙️ CONFIG (DEFAULTS SEGUROS)
--- ============================================================
-local CONFIG = {
-    -- 🟢 Visuals/Utils (ON por padrão)
-    ESP = true, Fullbright = true, NoFog = true, FOV = 70, AntiAFK = true,
-    -- 🟡 Movement (OFF por padrão)
-    WalkSpeed = 16, JumpPower = 50, Gravity = 1, InfiniteJump = false, Spin = false, SpinSpeed = 10, Sit = false,
-    -- 🔴 Dangerous (OFF + Flag)
-    Fly = false, FlySpeed = 50, Noclip = false, ClickTP = false,
-    -- Utils
-    AntiLag = false, Rejoin = false, ServerHop = false, SelectedPlayer = "Nenhum",
-    VelocidadeGlobal = 1000, AplicarVelocidade = false, LimiteVelocidade = 1000,
-    _Flags = {}
-}
-local CONFIG_PATH = "UniversalLite_Config_"..PlaceId..".json"
-
--- ============================================================
--- 💾 CONFIG PERSISTENCE (COM FALLBACK)
--- ============================================================
-local function saveConfig()
-    local data = {}; for k,v in pairs(CONFIG) do if type(v)~="function" and k:sub(1,1)~="_" then data[k]=v end end
-    local json = HttpService:JSONEncode(data)
-    if ExecutorCaps.hasWriteFile then
-        pcall(function() writefile(CONFIG_PATH, json) end)
-        Rayfield:Notify({Title="Config", Content="Salva em arquivo", Duration=2, Image="check-circle"})
-    else
-        pcall(function() setclipboard(json) end)
-        Rayfield:Notify({Title="Config", Content="Executor sem writefile — JSON copiado p/ Clipboard", Duration=8, Image="clipboard"})
-    end
-end
-local function loadConfig()
-    if not ExecutorCaps.hasWriteFile then return Rayfield:Notify({Title="Config", Content="Sem filesystem — use 'Carregar do Clipboard' manual", Duration=5, Image="alert-circle"}) end
-    local ok, data = pcall(function() if isfile(CONFIG_PATH) then return HttpService:JSONDecode(readfile(CONFIG_PATH)) end end)
-    if ok and data then for k,v in pairs(data) do if CONFIG[k]~=nil then CONFIG[k]=v end end
-        for k,v in pairs(CONFIG) do if type(v)=="boolean" then CONFIG._Flags[k]=v end end
-        Rayfield:Notify({Title="Config", Content="Carregada!", Duration=2, Image="check-circle"})
-    end
-end
-
--- ============================================================
--- 🧠 HELPERS
+-- 🧠 HELPERS DE APLICAÇÃO DE FÍSICA/VISUAL
 -- ============================================================
 local function getHum() return SafeGetHum() end
 local function getRoot() return SafeGetRoot() end
 local function limitSpeed(s) return math.min(s, CONFIG.LimiteVelocidade) end
+
 local function applyPhysics()
-    local hum = getHum(); local root = getRoot()
+    local hum = getHum()
     if hum then
         hum.WalkSpeed = CONFIG.AplicarVelocidade and limitSpeed(CONFIG.VelocidadeGlobal) or limitSpeed(CONFIG.WalkSpeed)
         hum.JumpPower = CONFIG.JumpPower; hum.UseJumpPower = true
         if CONFIG.Sit then hum.Sit = true end
     end
     workspace.Gravity = CONFIG.Gravity * 196.2
-    camera.FieldOfView = CONFIG.FOV
 end
 
--- ============================================================
--- 🟢 VISUALS LOOP (SEMPRE RODA — LEVE)
--- ============================================================
-Watchdog:Wrap("VisualsLoop", function()
+local function applyVisuals()
     camera.FieldOfView = CONFIG.FOV
     if CONFIG.Fullbright then Lighting.Brightness=2; Lighting.ClockTime=14; Lighting.FogEnd=1e5; Lighting.GlobalShadows=false else Lighting.GlobalShadows=true end
     if CONFIG.NoFog then Lighting.FogEnd=1e5 else Lighting.FogEnd=300 end
+end
+
+local function applyAll()
+    applyPhysics()
+    applyVisuals()
+end
+
+-- ============================================================
+-- 🟢 VISUALS LOOP (Watchdog)
+-- ============================================================
+Watchdog:Wrap("VisualsLoop", function()
+    applyVisuals()
 end, 1)
 
 -- ============================================================
--- 🟢 ESP HIGHLIGHT (SEMPRE RODA)
+-- 🟢 ESP HIGHLIGHT (Watchdog)
 -- ============================================================
 local ESP_Highlights = {}
 Watchdog:Wrap("ESPLoop", function()
-    if not CONFIG.ESP then for _,hl in pairs(ESP_Highlights) do pcall(function() hl:Destroy() end) end table.clear(ESP_Highlights) return end
+    if not CONFIG.ESP then
+        for _,hl in pairs(ESP_Highlights) do pcall(function() hl:Destroy() end) end
+        table.clear(ESP_Highlights)
+        return
+    end
     for _,plr in pairs(Players:GetPlayers()) do
         if plr~=player and plr.Character and SafeGetRoot(plr.Character) then
             local hl = ESP_Highlights[plr]
-            if not hl or not hl.Parent then hl=Instance.new("Highlight") hl.Name="ESP_HL" hl.FillTransparency=0.5 hl.OutlineTransparency=0 hl.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop hl.Parent=plr.Character ESP_Highlights[plr]=hl end
-            hl.FillColor=plr.TeamColor.Color; hl.OutlineColor=Color3.new(1,1,1)
+            if not hl or not hl.Parent then
+                hl=Instance.new("Highlight")
+                hl.Name="ESP_HL"
+                hl.FillTransparency=0.5
+                hl.OutlineTransparency=0
+                hl.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop
+                hl.Parent=plr.Character
+                ESP_Highlights[plr]=hl
+            end
+            hl.FillColor=plr.TeamColor.Color
+            hl.OutlineColor=Color3.new(1,1,1)
         end
     end
-    for plr,hl in pairs(ESP_Highlights) do if not Players:FindFirstChild(plr.Name) then pcall(function() hl:Destroy() end) ESP_Highlights[plr]=nil end end
+    for plr,hl in pairs(ESP_Highlights) do
+        if not Players:FindFirstChild(plr.Name) then
+            pcall(function() hl:Destroy() end)
+            ESP_Highlights[plr]=nil
+        end
+    end
 end, 0.5)
 
 -- ============================================================
--- 🟡 MOVEMENT LOOPS (Watchdog — só rodam se ligados)
+-- 🟡 MOVEMENT LOOPS (Watchdog)
 -- ============================================================
 Watchdog:Wrap("SpeedLoop", function()
     local hum = getHum()
@@ -217,7 +264,7 @@ Watchdog:Wrap("NoclipLoop", function()
 end, 0.1)
 
 -- ============================================================
--- 🔴 FLY STEALTH (CFrame + MoveDirection + Camera Tilt)
+-- 🔴 FLY STEALTH
 -- ============================================================
 local FlyConn
 local function ToggleFly(state)
@@ -280,10 +327,24 @@ local function ToggleFreeCam(state)
 end
 
 -- ============================================================
--- 🟢 INFINITE JUMP / ANTI-AFK / CLICK TP (RAYCAST ONLY)
+-- 🟢 EVENTOS: INFINITE JUMP / ANTI-AFK / CLICK TP
 -- ============================================================
-UserInputService.JumpRequest:Connect(function() if CONFIG.InfiniteJump then local h=getHum() if h then pcall(function() h:ChangeState(Enum.HumanoidStateType.Jumping) end) end end end)
-player.Idled:Connect(function() if CONFIG.AntiAFK then VInput_Click(math.random(100,500),math.random(100,500)) VInput_Key(Enum.KeyCode.Unknown,true) task.wait(0.05) VInput_Key(Enum.KeyCode.Unknown,false) end end)
+UserInputService.JumpRequest:Connect(function()
+    if CONFIG.InfiniteJump then
+        local h=getHum()
+        if h then pcall(function() h:ChangeState(Enum.HumanoidStateType.Jumping) end) end
+    end
+end)
+
+player.Idled:Connect(function()
+    if CONFIG.AntiAFK then
+        VInput_Click(math.random(100,500),math.random(100,500))
+        VInput_Key(Enum.KeyCode.Unknown,true)
+        task.wait(0.05)
+        VInput_Key(Enum.KeyCode.Unknown,false)
+    end
+end)
+
 UserInputService.InputBegan:Connect(function(input, gp)
     if CONFIG.ClickTP and not gp and (input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch) then
         local root = getRoot(); if not root then return end
@@ -297,11 +358,18 @@ end)
 -- ============================================================
 -- 🔄 RESPAWN HANDLER
 -- ============================================================
-player.CharacterAdded:Connect(function() task.wait(0.5) applyPhysics() if CONFIG.Fly then ToggleFly(true) end if CONFIG.FreeCam then ToggleFreeCam(true) end end)
+player.CharacterAdded:Connect(function()
+    task.wait(0.5)
+    applyAll()
+    if CONFIG.Fly then ToggleFly(true) end
+    if CONFIG.FreeCam then ToggleFreeCam(true) end
+end)
 
 -- ============================================================
--- 🖥️ UI RAYFIELD (BUILD)
+-- 🖥️ UI RAYFIELD + AUTO-SAVE/LOAD HOOKS (MELHORIA 3)
 -- ============================================================
+
+-- 1. CARREGA CONFIG ANTES DE CRIAR UI (Para CurrentValue pegar o valor salvo)
 loadConfig()
 
 local Window = Rayfield:CreateWindow({
@@ -310,35 +378,58 @@ local Window = Rayfield:CreateWindow({
     ConfigurationSaving = {Enabled=false}, KeySystem=false
 })
 
-local Tab = Window:CreateTab("Principal", 4483362458)
 local MoveTab = Window:CreateTab("Movimento ⚠️", 4483362458)
 local VisualTab = Window:CreateTab("Visuais ✅", 4483362458)
 local UtilTab = Window:CreateTab("Utilitários", 4483362458)
 
--- Helpers UI
+-- Helpers UI COM AUTO-SAVE EM CADA CALLBACK
 local function Slider(tab, cfg, opts)
-    opts.Flag=cfg; opts.CurrentValue=CONFIG[cfg]
-    opts.Callback=function(v) CONFIG[cfg]=v; if cfg=="WalkSpeed" or cfg=="FlySpeed" or cfg=="VelocidadeGlobal" then CONFIG[cfg]=limitSpeed(v) end
-        if cfg=="FOV" then camera.FieldOfView=v end if cfg=="Gravity" then workspace.Gravity=v*196.2 end
-        if cfg=="JumpPower" then local h=getHum(); if h then h.JumpPower=v; h.UseJumpPower=true end end
-        Rayfield:Notify({Title="Set", Content=cfg.." = "..v, Duration=1, Image="check"}) end
-    local o=tab:CreateSlider(opts); UI_Flags[cfg]=o; return o
-end
-local function Toggle(tab, cfg, opts, cb)
-    opts.Flag=cfg; opts.CurrentValue=CONFIG[cfg]
-    opts.Callback=function(v) CONFIG[cfg]=v; CONFIG._Flags[cfg]=v; if cb then cb(v) end
-        Rayfield:Notify({Title=v and "ON" or "OFF", Content=cfg, Duration=1, Image=v and "check-circle" or "x-circle"}) end
-    local o=tab:CreateToggle(opts); UI_Flags[cfg]=o; return o
+    opts.Flag = cfg
+    opts.CurrentValue = CONFIG[cfg]
+    opts.Callback = function(v)
+        CONFIG[cfg] = v
+        if cfg == "WalkSpeed" or cfg == "FlySpeed" or cfg == "VelocidadeGlobal" then CONFIG[cfg] = limitSpeed(v) end
+        if cfg == "FOV" then camera.FieldOfView = v end
+        if cfg == "Gravity" then workspace.Gravity = v * 196.2 end
+        if cfg == "JumpPower" then local h=getHum(); if h then h.JumpPower=v; h.UseJumpPower=true end end
+        if cfg == "SpinSpeed" then local r=getRoot(); local b=r and r:FindFirstChild("SpinForce"); if b then b.AngularVelocity=Vector3.new(0,v,0) end end
+        
+        -- 💾 AUTO-SAVE IMEDIATO
+        saveConfig()
+        
+        Rayfield:Notify({Title="Set", Content=cfg.." = "..v, Duration=1, Image="check"})
+    end
+    local o = tab:CreateSlider(opts)
+    UI_Flags[cfg] = o
+    return o
 end
 
--- ========== VISUAIS (SEGUROS — DEFAULT ON) ==========
+local function Toggle(tab, cfg, opts, cb)
+    opts.Flag = cfg
+    opts.CurrentValue = CONFIG[cfg]
+    opts.Callback = function(v)
+        CONFIG[cfg] = v
+        CONFIG._Flags[cfg] = v
+        if cb then cb(v) end
+        
+        -- 💾 AUTO-SAVE IMEDIATO
+        saveConfig()
+        
+        Rayfield:Notify({Title=v and "ON" or "OFF", Content=cfg, Duration=1, Image=v and "check-circle" or "x-circle"})
+    end
+    local o = tab:CreateToggle(opts)
+    UI_Flags[cfg] = o
+    return o
+end
+
+-- ========== VISUAIS ==========
 VisualTab:CreateSection("🟢 Seguros — Funcionam Quase Sempre")
 Toggle(VisualTab, "ESP", {Name="ESP Players (Highlight)"})
 Toggle(VisualTab, "Fullbright", {Name="Fullbright (Brilho Total)"})
 Toggle(VisualTab, "NoFog", {Name="No Fog (Sem Neblina)"})
 Slider(VisualTab, "FOV", {Name="FOV", Range={50,120}, Increment=1})
 
--- ========== MOVIMENTO (ARRISCADOS — DEFAULT OFF + AVISO) ==========
+-- ========== MOVIMENTO ==========
 MoveTab:CreateSection("🟡 Arriscados — Podem Rubberband/Kick em Jogos Protegidos")
 MoveTab:CreateLabel("⚠️ Use só em Obby/Tycoon/RP Leve. Desligue em BedWars, Arsenal, MM2, etc.")
 Slider(MoveTab, "WalkSpeed", {Name="WalkSpeed", Range={16,500}, Increment=1})
@@ -379,24 +470,25 @@ else
     UtilTab:CreateLabel("🚫 Server Hop indisponível (Executor sem RequestAsync)")
 end
 
-UtilTab:CreateSection("💾 Config")
-UtilTab:CreateButton({Name=ExecutorCaps.hasWriteFile and "Salvar Config (Arquivo)" or "Copiar Config (Clipboard)", Callback=saveConfig})
-UtilTab:CreateButton({Name="Carregar Config", Callback=function() loadConfig(); applyPhysics(); Rayfield:Notify({Title="OK", Content="Carregado & Aplicado", Duration=2, Image="check-circle"}) end})
-UtilTab:CreateButton({Name="Resetar Tudo", Callback=function()
-    CONFIG = {ESP=true,Fullbright=true,NoFog=true,FOV=70,AntiAFK=true,WalkSpeed=16,JumpPower=50,Gravity=1,InfiniteJump=false,Spin=false,SpinSpeed=10,Sit=false,Fly=false,FlySpeed=50,Noclip=false,ClickTP=false,AntiLag=false,Rejoin=false,ServerHop=false,SelectedPlayer="Nenhum",VelocidadeGlobal=1000,AplicarVelocidade=false,LimiteVelocidade=1000,_Flags={}}
-    applyPhysics(); ToggleFly(false); ToggleFreeCam(false)
+UtilTab:CreateSection("💾 Config (Auto-Save Ativo)")
+UtilTab:CreateButton({Name="Forçar Salvar Agora", Callback=function() saveConfig() Rayfield:Notify({Title="Config", Content="Salvo manualmente!", Duration=2, Image="check-circle"}) end})
+UtilTab:CreateButton({Name="Resetar Tudo (Padrão)", Callback=function()
+    CONFIG = {ESP=false,Fullbright=false,NoFog=false,FOV=70,AntiAFK=false,WalkSpeed=16,JumpPower=50,Gravity=1,InfiniteJump=false,Spin=false,SpinSpeed=10,Sit=false,Fly=false,FlySpeed=50,Noclip=false,ClickTP=false,AntiLag=false,Rejoin=false,ServerHop=false,SelectedPlayer="Nenhum",VelocidadeGlobal=1000,AplicarVelocidade=false,LimiteVelocidade=1000,_Flags={}}
+    applyAll(); ToggleFly(false); ToggleFreeCam(false)
     for _,hl in pairs(ESP_Highlights) do pcall(function() hl:Destroy() end) end; table.clear(ESP_Highlights)
-    Rayfield:Notify({Title="Reset", Content="Defaults restaurados", Duration=2, Image="check-circle"})
+    saveConfig() -- Salva o reset
+    Rayfield:Notify({Title="Reset", Content="Defaults restaurados e salvos", Duration=2, Image="check-circle"})
 end})
 
--- ========== FINAL ==========
-applyPhysics()
+-- ========== FINALIZAÇÃO ==========
+applyAll() -- Aplica estado carregado (ou defaults false) no character atual
 Rayfield:LoadConfiguration()
-Rayfield:Notify({Title="Universal Lite", Content="Carregado — Modo Seguro Ativo", Duration=5, Image="check-circle"})
+Rayfield:Notify({Title="Universal Lite", Content="Carregado — Auto-Save Ativo • Pasta: "..CONFIG_FOLDER, Duration=5, Image="check-circle"})
 
 getgenv()._UniversalScriptCleanup = function()
     for _,c in pairs(Watchdog.Connections) do pcall(function() c:Disconnect() end) end
-    if FlyConn then FlyConn:Disconnect() end; if FreeCamConn then FreeCamConn:Disconnect() end
+    if FlyConn then FlyConn:Disconnect() end
+    if FreeCamConn then FreeCamConn:Disconnect() end
     for _,hl in pairs(ESP_Highlights) do pcall(function() hl:Destroy() end) end
     print("[UniversalLite] Cleanup OK")
 end
