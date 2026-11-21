@@ -1,33 +1,16 @@
-Perfeito. O diagnóstico está **100% correto**: no Delta Mobile (e vários executores), o domínio `sirius.menu` costuma ser bloqueado ou instável, travando o `loadstring` antes de chegar na UI.
-
-Abaixo está o **script final, completo, único e pronto para colar** — já com:
-1. **URL do Rayfield trocada para `raw.githubusercontent.com` (GitHub Raw)** — direta, rápida e quase nunca bloqueada.
-2. `local UI_Flags = {}` declarada **antes** do Watchdog.
-3. `warn` com **crases (template strings)** válidas no Luau.
-4. Todo o resto igual: Hardening Pack, Fly mobile otimizado, Watchdog, Config persistente, etc.
-
----
-
-### ✅ **SCRIPT FINAL — COLE E EXECUTE**
-
-```lua
--- 🔵 0. AUTO-CLEANUP TOPO (Reexecução Segura)
-if getgenv()._UniversalScriptCleanup then
-    pcall(getgenv()._UniversalScriptCleanup)
-end
-
 -- 🔵 1. ESPERA PARA AUTO EXECUTE (game:IsLoaded)
 repeat task.wait() until game:IsLoaded()
 task.wait(1)
 
--- Carregar Rayfield UI (URL RAW DO GITHUB — FUNCIONA NO DELTA MOBILE)
-local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua'))()
+-- Carregar Rayfield UI (URL ORIGINAL MANTIDA)
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 -- Serviços
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local Lighting = game:GetService("Lighting")
+local VirtualUser = game:GetService("VirtualUser")
 local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
@@ -35,39 +18,6 @@ local VirtualInputManager = game:GetService("VirtualInputManager")
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 local PlaceId = game.PlaceId
-
--- ============================================================
--- 🛡️ HARDENING PACK: ANTI-KICK METATABLE __NAMECALL + FALLBACK
--- ============================================================
-pcall(function()
-    local mt = getrawmetatable(game)
-    if mt and setreadonly then
-        local oldNamecall = mt.__namecall
-        setreadonly(mt, false)
-        mt.__namecall = newcclosure(function(self, ...)
-            local method = getnamecallmethod()
-            if self == player and (method == "Kick" or method == "kick") then
-                warn("[ANTI-KICK] Kick bloqueado via __namecall:", ...)
-                Rayfield:Notify({ Title = "🛡️ Anti-Kick", Content = "Tentativa de kick bloqueada (metatable):\n" .. tostring(...), Duration = 5, Image = "shield" })
-                return nil
-            end
-            return oldNamecall(self, ...)
-        end)
-        setreadonly(mt, true)
-    end
-end)
-
--- Fallback HookFunction (Para executores sem getrawmetatable)
-pcall(function()
-    local OldKick = hookfunction(player.Kick, function(self, msg)
-        if self == player then
-            warn("[ANTI-KICK] Kick bloqueado via hookfunction:", msg)
-            Rayfield:Notify({ Title = "🛡️ Anti-Kick", Content = "Tentativa de kick bloqueada (hook):\n" .. tostring(msg), Duration = 5, Image = "shield" })
-            return
-        end
-        return OldKick(self, msg)
-    end)
-end)
 
 -- ============================================================
 -- 🛡️ SISTEMAS DE SEGURANÇA E COMPATIBILIDADE (INJETADOS)
@@ -101,7 +51,7 @@ local function VInput_Key(keyCode, down)
 	pcall(function() VirtualInputManager:SendKeyEvent(down, keyCode, false, game) end)
 end
 
--- 3. UI_FLAGS DECLARADO ANTES DO WATCHDOG (Correção 1)
+-- 3. UI_FLAGS DECLARADO ANTES DO WATCHDOG (Correção essencial)
 local UI_Flags = {}
 
 -- 3. WATCHDOG (Auto-desliga feature se der erro 3x - Evita Kick/Script Timeout/Console Spam)
@@ -119,7 +69,7 @@ function Watchdog:Wrap(name, func, interval)
 		local ok, err = pcall(func, dt)
 		if not ok then
 			self.Errors[name] = (self.Errors[name] or 0) + 1
-			-- CORREÇÃO 2: Sintaxe Luau válida com crases (interpolação)
+			-- CORREÇÃO 1: Sintaxe Luau válida (crases + {var})
 			warn(`[WATCHDOG] {name} Error [{self.Errors[name]}/{self.MaxErrors}]: {err}`)
 			if self.Errors[name] >= self.MaxErrors then
 				self:ForceDisable(name, tostring(err))
@@ -139,8 +89,20 @@ function Watchdog:ForceDisable(flagName, reason)
 	if UI_Flags[flagName] then
 		pcall(function() UI_Flags[flagName]:Set(false) end)
 	end
+	-- CORREÇÃO 3: Notify com tabela (padrão Rayfield atual)
 	Rayfield:Notify({ Title = "🛡️ WATCHDOG", Content = flagName .. " desligado (Segurança):\n" .. reason, Duration = 6, Image = "alert-triangle" })
 end
+
+-- 4. ANTI-KICK LOCAL (ORIGINAL: só hookfunction)
+local OldKick
+OldKick = hookfunction(player.Kick, function(self, msg)
+	if self == player then
+		warn("[ANTI-KICK] Kick local bloqueado:", msg)
+		Rayfield:Notify({ Title = "🛡️ Anti-Kick", Content = "Tentativa de kick bloqueada:\n" .. tostring(msg), Duration = 5, Image = "shield" })
+		return
+	end
+	return OldKick(self, msg)
+end)
 
 -- ============================================================
 -- SUA CONFIG ORIGINAL (MANTIDA) + _Flags PARA WATCHDOG
@@ -178,20 +140,17 @@ local CONFIG = {
 -- Config por PlaceId (Não mistura jogos diferentes)
 local CONFIG_PATH = "ScriptUniversal_Config_" .. PlaceId .. ".json"
 
--- Função para salvar configurações (COM FALLBACK CLIPBOARD)
+-- Função para salvar configurações
 local function saveConfig()
     local data = {}
     for k, v in pairs(CONFIG) do if type(v) ~= "function" and k:sub(1,1) ~= "_" then data[k] = v end end
-    local json = HttpService:JSONEncode(data)
     local success, error = pcall(function()
-        writefile(CONFIG_PATH, json)
+        writefile(CONFIG_PATH, HttpService:JSONEncode(data))
     end)
     if success then
         Rayfield:Notify({ Title = "Sucesso", Content = "Configurações salvas!", Duration = 3, Image = "check-circle" })
     else
-        -- FALLBACK: Copia para clipboard se writefile falhar (Mobile/Executor sem FS)
-        pcall(function() setclipboard(json) end)
-        Rayfield:Notify({ Title = "Atenção", Content = "Falha ao salvar arquivo (Permissão?). Config copiada para Clipboard. Cole num .txt manual se quiser.", Duration = 10, Image = "alert-circle" })
+        Rayfield:Notify({ Title = "Erro", Content = "Erro ao salvar: " .. error, Duration = 3, Image = "alert-circle" })
     end
 end
 
@@ -207,7 +166,7 @@ local function loadConfig()
     
     if success and data then
         for key, value in pairs(data) do
-            if CONFIG[key] ~= nil then CONFIG[key] = value end
+            CONFIG[key] = value
         end
         -- Sincroniza _Flags para Watchdog saber o que está ligado
         for key, value in pairs(CONFIG) do
@@ -305,10 +264,10 @@ local function limitSpeed(speed)
 end
 
 -- ============================================================
--- FEATURES COMPLEXAS REESCRITAS PARA FUNCIONAR DE VERDADE
+-- FEATURES COMPLEXAS REESCRITAS PARA FUNCIONAR DE VERDADE (SUA LÓGICA ORIGINAL MANTIDA)
 -- ============================================================
 
--- FLY STEALTH MOBILE OTIMIZADO (CFrame no RenderStepped - MoveDirection + Camera Tilt)
+-- FLY STEALTH (CFrame no RenderStepped - LÓGICA ORIGINAL COM flatLook/flatRight)
 local FlyConn
 local function ToggleFly(state)
     CONFIG.Fly = state
@@ -319,55 +278,36 @@ local function ToggleFly(state)
         Rayfield:Notify({ Title = "Fly", Content = "Character não encontrado.", Duration = 3, Image = "alert-circle" })
         CONFIG.Fly = false
         CONFIG._Flags.Fly = false
-        if UI_Flags.Fly then pcall(function() UI_Flags.Fly:Set(false) end) end
+        if Rayfield.Flags and Rayfield.Flags.Fly then Rayfield.Flags.Fly:Set(false) end
         return 
     end
 
     if state then
         hum.PlatformStand = true
-        Rayfield:Notify({ Title = "Fly Ativado", Content = "Modo Mobile: Analógico Move | Camera Up/Down", Duration = 3, Image = "check-circle" })
+        Rayfield:Notify({ Title = "Fly Ativado", Content = "Modo Stealth CFrame (WASD + Space/Shift)", Duration = 3, Image = "check-circle" })
         FlyConn = RunService.RenderStepped:Connect(function(dt)
             if not CONFIG.Fly then return ToggleFly(false) end
             local hum = getHum()
             local root = getRoot()
             if not hum or not root then return ToggleFly(false) end
             
-            -- 1. Direção Horizontal: MoveDirection (Respeita Analógico Virtual Delta Mobile)
-            local moveDir = hum.MoveDirection -- Já é relativo à câmera e normalizado (0 a 1)
+            local moveDir = hum.MoveDirection
+            local camCF = camera.CFrame
             local speed = (CONFIG.AplicarVelocidade and CONFIG.VelocidadeGlobal or CONFIG.FlySpeed) * dt * 60
             local newCF = root.CFrame
             
             if moveDir.Magnitude > 0 then
-                -- MoveDirection já vem no espaço mundial relativo à câmera no mobile/PC
-                newCF = newCF + (moveDir * speed)
+                local look = camCF.LookVector
+                local right = camCF.RightVector
+                local flatLook = Vector3.new(look.X, 0, look.Z).Unit
+                local flatRight = Vector3.new(right.X, 0, right.Z).Unit
+                local moveVec = (flatLook * -moveDir.Z) + (flatRight * moveDir.X)
+                newCF = newCF + (moveVec.Unit * speed)
             end
             
-            -- 2. Vertical: Inclinação da Câmera (LookVector.Y) + Teclas/Toques (Space/Shift/Jump Button)
-            local verticalSpeed = speed
-            local camLook = camera.CFrame.LookVector
+            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then newCF = newCF + Vector3.new(0, speed, 0) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then newCF = newCF - Vector3.new(0, speed, 0) end
             
-            -- Detecta input de "Subir" (Espaço, Botão Pulo Mobile, Shift Direito em alguns layouts)
-            local isJumping = UserInputService:IsKeyDown(Enum.KeyCode.Space) or UserInputService:IsKeyDown(Enum.KeyCode.ButtonA) -- ButtonA costuma ser pulo no mobile
-            -- Detecta input de "Descer" (LeftShift, ButtonL2, etc)
-            local isCrouching = UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) or UserInputService:IsKeyDown(Enum.KeyCode.ButtonL2)
-            
-            -- Lógica de Câmera: Se olhar para cima (> 30 graus), sobe automaticamente. Se olhar para baixo, desce.
-            -- Isso permite voar "para onde olha" sem precisar segurar botão extra.
-            local pitchFactor = camLook.Y -- -1 (baixo) a 1 (cima)
-            
-            -- Prioridade: Input Direto > Inclinação Câmera
-            if isJumping then
-                newCF = newCF + Vector3.new(0, verticalSpeed, 0)
-            elseif isCrouching then
-                newCF = newCF - Vector3.new(0, verticalSpeed, 0)
-            else
-                -- Auto-subir/descer pela câmera (Sensibilidade 50% da velocidade)
-                if math.abs(pitchFactor) > 0.15 then -- Deadzone para não tremer no neutro
-                    newCF = newCF + Vector3.new(0, pitchFactor * verticalSpeed * 0.5, 0)
-                end
-            end
-            
-            -- Aplica CFrame e Zera Velocidade Física (Anti-Gravidade/Queda)
             root.CFrame = newCF
             root.AssemblyLinearVelocity = Vector3.zero
             root.AssemblyAngularVelocity = Vector3.zero
@@ -379,7 +319,7 @@ local function ToggleFly(state)
     end
 end
 
--- ESP REAL (Highlight Loop - Seu original não criava nada)
+-- ESP REAL (Highlight Loop)
 local ESP_Highlights = {}
 Watchdog:Wrap("ESPLoop", function()
     if not CONFIG.ESP then 
@@ -412,7 +352,7 @@ Watchdog:Wrap("ESPLoop", function()
     end
 end, 0.5)
 
--- FREECAM CORRIGIDO (RenderStepped + dt - Sem HeartbeatWait inexistente)
+-- FREECAM (RenderStepped + dt)
 local FreeCamConn
 local function ToggleFreeCam(state)
     CONFIG.FreeCam = state
@@ -446,7 +386,7 @@ local function ToggleFreeCam(state)
         if FreeCamConn then FreeCamConn:Disconnect(); FreeCamConn = nil end
         camera.CameraType = Enum.CameraType.Custom
         camera.CameraSubject = hum
-        if hum then applyConfig() end -- Restaura speed/jump
+        if hum then applyConfig() end
     end
 end
 
@@ -461,7 +401,7 @@ Watchdog:Wrap("VisualsLoop", function()
     if CONFIG.NoFog then Lighting.FogEnd = 100000 else Lighting.FogEnd = 300 end
 end, 1)
 
--- NOCLIP LOOP (Watchdog + AntiLag support)
+-- NOCLIP LOOP
 Watchdog:Wrap("NoclipLoop", function()
     if not CONFIG.Noclip then return end
     local char = player.Character
@@ -474,7 +414,7 @@ Watchdog:Wrap("NoclipLoop", function()
     end
 end, 0.1)
 
--- SPIN LOOP (Watchdog)
+-- SPIN LOOP
 Watchdog:Wrap("SpinLoop", function(dt)
     if not CONFIG.Spin then return end
     local root = getRoot()
@@ -483,7 +423,7 @@ Watchdog:Wrap("SpinLoop", function(dt)
     end
 end)
 
--- INFINITE JUMP (Evento - Seguro)
+-- INFINITE JUMP
 UserInputService.JumpRequest:Connect(function()
     if CONFIG.InfiniteJump then
         local hum = getHum()
@@ -491,7 +431,7 @@ UserInputService.JumpRequest:Connect(function()
     end
 end)
 
--- ANTI-AFK (VirtualInput Real - Bypass Heurística)
+-- ANTI-AFK
 player.Idled:Connect(function()
     if CONFIG.AntiAFK then
         VInput_Click(math.random(100, 500), math.random(100, 500))
@@ -501,7 +441,7 @@ player.Idled:Connect(function()
     end
 end)
 
--- CLICK TP (VirtualInput Raycast - Funciona PC e Mobile Touch)
+-- CLICK TP
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if CONFIG.ClickTP and not gameProcessed then
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -521,7 +461,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
--- PROTEÇÃO DE VELOCIDADE (Heartbeat Leve - Garante que speed não reseta)
+-- PROTEÇÃO DE VELOCIDADE
 RunService.Heartbeat:Connect(function()
     local hum = getHum()
     if hum then
@@ -532,20 +472,19 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
--- RESPAWN HANDLER (Reaplica tudo)
+-- RESPAWN HANDLER
 player.CharacterAdded:Connect(function(newChar)
     task.wait(0.5)
     applyConfig()
     if CONFIG.Fly then ToggleFly(true) end
     if CONFIG.FreeCam then ToggleFreeCam(true) end
-    -- Noclip/ESP/Spin/Visuals são Watchdog (auto-reconectam via _Flags)
 end)
 
 -- ============================================================
 -- UI RAYFIELD (SUA ESTRUTURA ORIGINAL 100% MANTIDA)
 -- ============================================================
 
--- 1. CARREGA CONFIG ANTES DA UI (Para Sliders abrirem com valores salvos)
+-- 1. CARREGA CONFIG ANTES DA UI
 loadConfig()
 
 -- Criar Janela Rayfield
@@ -564,7 +503,7 @@ local Window = Rayfield:CreateWindow({
 -- Aba Player
 local PlayerTab = Window:CreateTab("Player", 4483362458)
 
--- Helpers para sincronizar UI <-> CONFIG <-> WATCHDOG (Mantém seus Flags originais)
+-- Helpers para sincronizar UI <-> CONFIG <-> WATCHDOG
 local function SyncSlider(cfgKey, opts)
     opts.Flag = cfgKey
     opts.CurrentValue = CONFIG[cfgKey]
@@ -589,7 +528,7 @@ local function SyncToggle(cfgKey, opts, onToggle)
     opts.CurrentValue = CONFIG[cfgKey]
     opts.Callback = function(Value)
         CONFIG[cfgKey] = Value
-        CONFIG._Flags[cfgKey] = Value -- Watchdog lê isso
+        CONFIG._Flags[cfgKey] = Value
         if onToggle then onToggle(Value) end
         Rayfield:Notify({ Title = (Value and "Ativado" or "Desativado"), Content = cfgKey, Duration = 2, Image = (Value and "check-circle" or "x-circle") })
     end
@@ -731,44 +670,16 @@ end })
 -- ============================================================
 -- FINALIZAÇÃO
 -- ============================================================
-applyConfig() -- Aplica física inicial no char atual
-Rayfield:LoadConfiguration() -- Carrega UI Flags (Theme, Keybinds)
-Rayfield:Notify({ Title = "Sucesso", Content = "Script carregado com sucesso! (Hardening Pack + GitHub Raw URL)", Duration = 5, Image = "check-circle" })
+applyConfig()
+Rayfield:LoadConfiguration()
+Rayfield:Notify({ Title = "Sucesso", Content = "Script carregado com sucesso! (Original Corrigido)", Duration = 5, Image = "check-circle" })
 
--- Cleanup Global (Para reexecução segura via getgenv()._UniversalScriptCleanup())
+-- Cleanup Global
 getgenv()._UniversalScriptCleanup = function()
     for _, conn in pairs(Watchdog.Connections) do pcall(function() conn:Disconnect() end) end
     if FlyConn then FlyConn:Disconnect() end
     if FreeCamConn then FreeCamConn:Disconnect() end
     for _, hl in pairs(ESP_Highlights) do pcall(function() hl:Destroy() end) end
-    -- Restaura metatable se possível (segurança extra)
-    pcall(function()
-        local mt = getrawmetatable(game)
-        if mt then setreadonly(mt, false) end
-    end)
+    if OldKick then hookfunction(player.Kick, OldKick) end
     print("[UniversalScript] Cleanup completo.")
 end
-```
-
----
-
-### 🎯 **O que muda na prática:**
-| Antes | Agora |
-|-------|-------|
-| `https://sirius.menu/rayfield` (bloqueado no Delta Mobile) | `https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua` (CDN GitHub, quase 100% uptime) |
-| `UI_Flags` declarado depois do Watchdog → erro `nil` | `UI_Flags = {}` **antes** do Watchdog → `ForceDisable` funciona |
-| `warn("[WATCHDOG] ${name}...")` → sintaxe inválida | `warn(`[WATCHDOG] {name}...`)` → **Luau válido** |
-
----
-
-### ▶️ **Como testar agora:**
-1. Abra o **Delta** no celular.  
-2. Cole o script **inteiro** acima.  
-3. Aperte **Execute**.  
-4. A janela **"Script Universal - Player"** deve abrir **imediatamente**.  
-
-Se **ainda não abrir**:  
-- Abra o **Console (F9 ou `/console`)** → aba **Client** → tire print do erro vermelho e me mande.  
-- Verifique se **HttpGet/Request** está ligado nas *Settings* do Delta.
-
-Pronto. Era só a URL + os dois ajustes de sintaxe. 🚀
