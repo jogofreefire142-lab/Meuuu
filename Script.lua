@@ -264,7 +264,7 @@ PlayerTab:CreateSection("🏃 Movimentação e Física")
 -- Slider de Velocidade Universal
 PlayerTab:CreateSlider({
     Name = "Velocidade Universal",
-    Flag = "VelocidadeGlobal", -- 🔵 3. ETIQUETA DE SALVAMENTO
+    Flag = "VelocidadeGlobal",
     Range = {1, 1000},
     Increment = 1,
     CurrentValue = 1000,
@@ -280,7 +280,7 @@ PlayerTab:CreateSlider({
 -- Toggle para ativar velocidade universal
 PlayerTab:CreateToggle({
     Name = "Ativar Velocidade Universal",
-    Flag = "AplicarVelocidade", -- 🔵 3. ETIQUETA DE SALVAMENTO
+    Flag = "AplicarVelocidade",
     CurrentValue = false,
     Callback = function(Value)
         CONFIG.AplicarVelocidade = Value
@@ -297,7 +297,7 @@ PlayerTab:CreateToggle({
 -- Slider de Limite de Velocidade
 PlayerTab:CreateSlider({
     Name = "Limite de Velocidade",
-    Flag = "LimiteVelocidade", -- 🔵 3. ETIQUETA DE SALVAMENTO
+    Flag = "LimiteVelocidade",
     Range = {1, 1000},
     Increment = 1,
     CurrentValue = 1000,
@@ -313,7 +313,7 @@ PlayerTab:CreateSlider({
 -- Slider de Velocidade Máxima
 PlayerTab:CreateSlider({
     Name = "Velocidade Máxima",
-    Flag = "MaxSpeed", -- 🔵 3. ETIQUETA DE SALVAMENTO
+    Flag = "MaxSpeed",
     Range = {1, 1000},
     Increment = 1,
     CurrentValue = 1000,
@@ -335,7 +335,7 @@ PlayerTab:CreateSlider({
 -- Slider de WalkSpeed
 PlayerTab:CreateSlider({
     Name = "WalkSpeed (Velocidade)",
-    Flag = "WalkSpeed", -- 🔵 3. ETIQUETA DE SALVAMENTO
+    Flag = "WalkSpeed",
     Range = {1, 1000},
     Increment = 1,
     CurrentValue = 16,
@@ -351,7 +351,7 @@ PlayerTab:CreateSlider({
 -- Slider de JumpPower
 PlayerTab:CreateSlider({
     Name = "JumpPower (Força do Pulo)",
-    Flag = "JumpPower", -- 🔵 3. ETIQUETA DE SALVAMENTO
+    Flag = "JumpPower",
     Range = {50, 300},
     Increment = 1,
     CurrentValue = 50,
@@ -368,7 +368,7 @@ PlayerTab:CreateSlider({
 -- Slider de Gravidade
 PlayerTab:CreateSlider({
     Name = "Gravidade",
-    Flag = "Gravity", -- 🔵 3. ETIQUETA DE SALVAMENTO
+    Flag = "Gravity",
     Range = {0.1, 5},
     Increment = 0.1,
     CurrentValue = 1,
@@ -381,7 +381,7 @@ PlayerTab:CreateSlider({
 -- Toggle de Infinite Jump
 PlayerTab:CreateToggle({
     Name = "Infinite Jump (Pulo Infinito)",
-    Flag = "InfiniteJump", -- 🔵 3. ETIQUETA DE SALVAMENTO
+    Flag = "InfiniteJump",
     CurrentValue = false,
     Callback = function(Value)
         CONFIG.InfiniteJump = Value
@@ -391,7 +391,7 @@ PlayerTab:CreateToggle({
 -- Toggle de Noclip
 PlayerTab:CreateToggle({
     Name = "Noclip (Atravessar Paredes)",
-    Flag = "Noclip", -- 🔵 3. ETIQUETA DE SALVAMENTO
+    Flag = "Noclip",
     CurrentValue = false,
     Callback = function(Value)
         CONFIG.Noclip = Value
@@ -401,7 +401,7 @@ PlayerTab:CreateToggle({
 -- Toggle de Spin
 PlayerTab:CreateToggle({
     Name = "Spin (Girar Rápido)",
-    Flag = "Spin", -- 🔵 3. ETIQUETA DE SALVAMENTO
+    Flag = "Spin",
     CurrentValue = false,
     Callback = function(Value)
         CONFIG.Spin = Value
@@ -411,7 +411,7 @@ PlayerTab:CreateToggle({
 -- Slider de SpinSpeed
 PlayerTab:CreateSlider({
     Name = "SpinSpeed (Velocidade do Giro)",
-    Flag = "SpinSpeed", -- 🔵 3. ETIQUETA DE SALVAMENTO
+    Flag = "SpinSpeed",
     Range = {1, 50},
     Increment = 1,
     CurrentValue = 10,
@@ -423,7 +423,7 @@ PlayerTab:CreateSlider({
 -- Toggle de Sit
 PlayerTab:CreateToggle({
     Name = "Sit (Sentar)",
-    Flag = "Sit", -- 🔵 3. ETIQUETA DE SALVAMENTO
+    Flag = "Sit",
     CurrentValue = false,
     Callback = function(Value)
         CONFIG.Sit = Value
@@ -442,7 +442,6 @@ PlayerTab:CreateSection("✈️ Fly (Voar)")
 -- Toggle de Fly
 PlayerTab:CreateToggle({
     Name = "Ativar Fly (Mobile/PC)",
-    -- 🔵 3. NÃO COLOQUE FLAG NO FLY (para não entrar no mapa voando)
     CurrentValue = false,
     Callback = function(Value)
         CONFIG.Fly = Value
@@ -465,7 +464,7 @@ PlayerTab:CreateToggle({
 -- Slider de FlySpeed
 PlayerTab:CreateSlider({
     Name = "Velocidade do Fly",
-    Flag = "FlySpeed", -- 🔵 3. ETIQUETA DE SALVAMENTO
+    Flag = "FlySpeed",
     Range = {1, 1000},
     Increment = 5,
     CurrentValue = 50,
@@ -480,7 +479,7 @@ PlayerTab:CreateSection("👁️ Visual e Câmera")
 -- Toggle de ESP
 PlayerTab:CreateToggle({
     Name = "ESP Players (Ver Jogadores)",
-    Flag = "ESP", -- 🔵 3. ETIQUETA DE SALVAMENTO
+    Flag = "ESP",
     CurrentValue = false,
     Callback = function(Value)
         CONFIG.ESP = Value
@@ -497,7 +496,7 @@ PlayerTab:CreateToggle({
 -- Toggle de Fullbright
 PlayerTab:CreateToggle({
     Name = "Fullbright (Brilho Máximo)",
-    Flag = "Fullbright", -- 🔵 3. ETIQUETA DE SALVAMENTO
+    Flag = "Fullbright",
     CurrentValue = false,
     Callback = function(Value)
         CONFIG.Fullbright = Value
@@ -515,7 +514,7 @@ PlayerTab:CreateToggle({
 -- Toggle de NoFog
 PlayerTab:CreateToggle({
     Name = "No Fog (Sem Neblina)",
-    Flag = "NoFog", -- 🔵 3. ETIQUETA DE SALVAMENTO
+    Flag = "NoFog",
     CurrentValue = false,
     Callback = function(Value)
         CONFIG.NoFog = Value
@@ -530,7 +529,7 @@ PlayerTab:CreateToggle({
 -- Slider de FOV
 PlayerTab:CreateSlider({
     Name = "FOV (Campo de Visão)",
-    Flag = "FOV", -- 🔵 3. ETIQUETA DE SALVAMENTO
+    Flag = "FOV",
     Range = {50, 120},
     Increment = 1,
     CurrentValue = 70,
@@ -543,7 +542,7 @@ PlayerTab:CreateSlider({
 -- Toggle de FreeCam
 PlayerTab:CreateToggle({
     Name = "FreeCam (Câmera Livre)",
-    Flag = "FreeCam", -- 🔵 3. ETIQUETA DE SALVAMENTO
+    Flag = "FreeCam",
     CurrentValue = false,
     Callback = function(Value)
         CONFIG.FreeCam = Value
@@ -576,7 +575,7 @@ end
 -- Dropdown para selecionar jogador
 PlayerTab:CreateDropdown({
     Name = "Selecionar Jogador",
-    Flag = "SelectedPlayer", -- 🔵 3. ETIQUETA DE SALVAMENTO
+    Flag = "SelectedPlayer",
     Options = playerList,
     CurrentOption = playerList[1] or "Nenhum",
     Callback = function(Option)
@@ -618,7 +617,7 @@ PlayerTab:CreateButton({
 -- Toggle de Teleporte por Clique
 PlayerTab:CreateToggle({
     Name = "Click/Touch TP (Teleporte por Clique)",
-    Flag = "ClickTP", -- 🔵 3. ETIQUETA DE SALVAMENTO
+    Flag = "ClickTP",
     CurrentValue = false,
     Callback = function(Value)
         CONFIG.ClickTP = Value
@@ -640,7 +639,7 @@ PlayerTab:CreateButton({
 -- Toggle de Anti-Lag
 PlayerTab:CreateToggle({
     Name = "Anti-Lag (Estabilizar FPS)",
-    Flag = "AntiLag", -- 🔵 3. ETIQUETA DE SALVAMENTO
+    Flag = "AntiLag",
     CurrentValue = false,
     Callback = function(Value)
         CONFIG.AntiLag = Value
@@ -724,7 +723,7 @@ PlayerTab:CreateButton({
 -- Toggle de Anti-AFK
 PlayerTab:CreateToggle({
     Name = "Anti-AFK",
-    Flag = "AntiAFK", -- 🔵 3. ETIQUETA DE SALVAMENTO
+    Flag = "AntiAFK",
     CurrentValue = false,
     Callback = function(Value)
         CONFIG.AntiAFK = Value
