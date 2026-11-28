@@ -1,615 +1,680 @@
---[[
-    UNIVERSAL PLAYER HUB - BULLETPROOF EDITION (FIXED)
-    Features: SafeChar, Watchdog Loops, VirtualInput (Real Clicks), Per-Game Config, Anti-Kick UI.
-    Compatibility: R6, R15, Custom Rigs, Mobile, PC, Executors (Delta, Fluxus, Hydrogen, CodeX, etc)
-]]--
+{
+    "CSGLevelOfDetailSwitchingDistanceL23": "0",
+    "CSGLevelOfDetailSwitchingDistanceL12": "0",
+    "CSGLevelOfDetailSwitchingDistanceL34": "0",
+    "CSGLevelOfDetailSwitchingDistance": "0",
 
--- 🔵 1. LOAD & SERVICES
-repeat task.wait() until game:IsLoaded()
-local RunService = game:GetService("RunService")
-local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
-local Lighting = game:GetService("Lighting")
-local VirtualUser = game:GetService("VirtualUser")
-local TeleportService = game:GetService("TeleportService")
-local HttpService = game:GetService("HttpService")
-local VirtualInputManager = game:GetService("VirtualInputManager")
-local CoreGui = game:GetService("CoreGui")
-local TweenService = game:GetService("TweenService")
-local MarketplaceService = game:GetService("MarketplaceService")
+    "DebugLimitMinTextureResolutionWhenSkipMips": "10",
+    "DebugForceFSMCPULightCulling": "True",
+    "DebugTextureManagerSkipMips": "10",
+    "DebugDisplayFPS": "True",
+    "DebugSkyGray": "True",
 
-local player = Players.LocalPlayer
-local camera = workspace.CurrentCamera
-local PlaceId = game.PlaceId
-local GameId = game.GameId
+    "DFFlagLocalizationTableAnalyticsSenderRequeueFailedEntries": "False",
+    "DFFlagSafetyServiceScreenshotAvatarIdHumanoidDescCapture": "True",
+    "DFFlagAvatarChatServiceUserPermissionsAudioEligible": "False",
+    "DFFlagTeleportClientAssetPreloadingDoingExperiment2": "True",
+    "DFFlagHumanoidReplicateSimulated2TurnOffLocalState": "False",
+    "DFFlagAllowRegistrationOfAnimationClipInCoreScripts": "true",
+    "DFFlagEnablePerfDataCoreCategoryTimersCollection2": "False",
+    "DFFlagSimSolverImprovedPartialSleepDefaultEnabled": "False",
+    "DFFlagTeleportClientAssetPreloadingDoingExperiment": "True",
+    "DFFlagDebugRakPeerReceiveCountDistributedPackets": "False",
+    "DFFlagAvatarChatServiceUserPermissionsAudioOptIn": "False",
+    "DFFlagAcceleratorUpdateOnPropsAndValueTimeChange": "True",
+    "DFFlagReportHumanoidRigAndModelTypeIfDifferent": "False",
+    "DFFlagEnablePerfDataSubsystemTimersCollection2": "False",
+    "DFFlagDebugPhysicsSenderDoesNotShrinkSimRadius": "True",
+    "DFFlagTeleportClientAssetPreloadingEnabledIXP2": "True",
+    "DFFlagEnableExperienceNotificationOptInPrompt": "False",
+    "DFFlagTeleportClientAssetPreloadingEnabledIXP": "True",
+    "DFFlagNotificationServiceIsConnectedProperty": "False",
+    "DFFlagDebugRemoteRequestEnableAllTimerGroups": "False",
+    "DFFlagAnimatorRetargetInterpolateFKCorrection": "True",
+    "DFFlagPerformanceControlEnableMemoryProbing3": "True",
+    "DFFlagWebrtcSendPacketsOnWorkerThreadEnabled": "True",
+    "DFFlagOnlyDecrementCompletenessIfReplicating": "True",
+    "DFFlagDebugLargeReplicatorDisableCompression": "True",
+    "DFFlagDebugHumanoidUseMeshCollisionFidelity": "True",
+    "DFFlagTeleportClientAssetPreloadingEnabled9": "True",
+    "DFFlagPlayerHumanoidPropertyUpdateRestrict": "False",
+    "DFFlagSimSolverUpdateImprovedSleepEnabled": "False",
+    "DFFlagDebugAuroraAllowAdaptiveTimestepping": "True",
+    "DFFlagDebugSimAdaptiveEnable60HzHumanoids": "False",
+    "DFFlagAudioEnableVolumetricPanningForPolys": "True",
+    "DFFlagRccLoadSoundLengthTelemetryEnabled": "False",
+    "DFFlagPhysicsMechanismCacheOptimizeAlloc": "True",
+    "DFFlagReplicatorCheckReadTableCollisions": "True",
+    "DFFlagBrowserTrackerIdTelemetryEnabled": "False",
+    "DFFlagHttpPointsReporterUseCompression": "False",
+    "DFFlagAssetPreloadingUrlVersionEnabled2": "True",
+    "DFFlagDebugLargeReplicatorForceFullSend": "True",
+    "DFFlagEnablePerfRenderStatsCollection2": "false",
+    "DFFlagDebugLargeReplicatorDisableDelta": "true",
+    "DFFlagRakNetEnsureAckSendLoopIsFinite": "False",
+    "DFFlagDebugForceHumanoidSimulateAlways": "True",
+    "DFFlagReplicatorSeparateVarThresholds": "True",
+    "DFFlagReportAssetRequestV1Telemetry": "False",
+    "DFFlagReplicatorKickRecvVariantSpeed": "True",
+    "DFFlagGraphicsQualityUsageTelemetry": "False",
+    "DFFlagTextureQualityOverrideEnabled": "True",
+    "DFFlagJointIrregularityOptimization": "True",
+    "DFFlagEnableAnimatorRetargetingMode": "True",
+    "DFFlagAudioToggleVolumetricPanning": "True",
+    "DFFlagDebugPrintDataPingBreakDown": "False",
+    "DFFlagHumanoidReplicateSimulated2": "True",
+    "DFFlagSkipReadDiskCacheRedirects": "true",
+    "DFFlagEnablePercentileTelemetry": "False",
+    "DFFlagTeleportPreloadingMetrics5": "True",
+    "DFFlagDebugUpdateClientChannelB": "false",
+    "DFFlagAudioUseVolumetricPanning": "True",
+    "DFFlagDebugDrawBroadPhaseAABBs": "False",
+    "DFFlagSimOptimizeHumanoidPlayer": "True",
+    "DFFlagCLI46794SendToTelemetry": "False",
+    "DFFlagReportHumanoidRigUpdate": "False",
+    "DFFlagSampleAndRefreshRakPing": "True",
+    "DFFlagDisableFastLogTelemetry": "True",
+    "DFFlagTrackNetworkSenderStall": "True",
+    "DFFlagEnableTexturePreloading": "True",
+    "DFFlagReplicateCreateToPlayer": "True",
+    "DFFlagDebugSkipMeshVoxelizer": "True",
+    "DFFlagDebugOverrideDPIScale": "False",
+    "DFFlagReplicatorDisKickSize": "True",
+    "DFFlagEnableSoundPreloading": "True",
+    "DFFlagEnableMeshPreloading2": "True",
+    "DFFlagRakNetStaleSendQueue": "True",
+    "DFFlagOptimizePartsInPart": "True",
+    "DFFlagDebugPauseVoxelizer": "True",
+    "DFFlagAssetPreloadingIXP": "True",
+    "DFFlagRakNetEnablePoll": "True",
+    "DFFlagHumanoidSimWorld": "True",
+    "DFFlagSimCSG3DCDStats": "False",
+    "DFFlagDisableDPIScale": "True",
+    "DFFlagDebugPerfMode": "True",
+    "DFFlagPredictedOOM": "False",
+    "DFFlagDebugSkyGray": "True",
 
--- 🔵 2. RAYFIELD UI (Protected Load)
-local Rayfield
-local successRayfield, errRayfield = pcall(function()
-    Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
-end)
-if not successRayfield then
-    player:Kick("Falha ao carregar Rayfield UI: " .. tostring(errRayfield))
-    return
-end
+    "DFIntLocalizationTableAnalyticsSenderClientToServerSampleRateHundrethsPercent": "7500",
+    "DFIntLocalizationTableAnalyticsSenderServerToHttpSampleRateHundrethsPercent": "100",
+    "DFIntLocalizationTableAnalyticsSenderMaxToBeProcessedQueueSizeServer": "200",
+    "DFIntLocalizationTableAnalyticsSenderMaxToBeProcessedQueueSizeClient": "100",
+    "DFIntAvatarFacechatReplicationOverRCCTelemetryThrottleHundrethsPercent": "0",
+    "DFIntHumanoidNetworkOwnershipChangeEventIngestThrottleHundrethsPercent": "1",
+    "DFIntLocalizationTableAnalyticsSenderClientToHttpMinHundrethsPercent": "5",
+    "DFIntLocalizationTableAnalyticsSenderMaxPlayerIntegrityListSize": "100",
+    "DFIntReplicationFocusNouExtentsSizeCutoffForPauseStuds": "2147483647",
+    "DFIntClientLightingTechnologyChangedTelemetryHundredthsPercent": "0",
+    "DFIntDynamicTranslationSenderMaxEntriesPerHttpMessage": "147483647",
+    "DFIntConnectionLostDisconnectReasonInfluxHundredthsPercentage": "0",
+    "DFIntSignalRCoreHubConnectionDisconnectInfoHundredthsPercent": "10",
+    "DFIntNetworkStopProducingPacketsToProcessThresholdMs": "2147483647",
+    "DFIntLocalizationTableAnalyticsSenderMaxEntriesPerRemoteEvent": "5",
+    "DFIntLocalizationTableAnalyticsSenderMaxBytesPerSecondClient": "1",
+    "DFIntTeleportClientAssetPreloadingHundredthsPercentage2": "100000",
+    "DFIntLocalizationTableAnalyticsSenderMaxBytesPerSecondServer": "1",
+    "DFIntDynamicTranslationSenderMaxBytesPerHttpMessage": "147483647",
+    "DFIntLocalizationTableAnalyticsSenderMaxServerQueueSize": "15000",
+    "DFIntGraphicsOptimizationModePerformanceScalePercent": "10000000",
+    "DFIntLocalizationTableAnalyticsSenderClientToHttpScale": "500000",
+    "DFIntTeleportClientAssetPreloadingHundredthsPercentage": "100000",
+    "DFIntDynamicTranslationSenderMaxBytesPerSecondServer": "10000000",
+    "DFIntPerformanceControlTextureQualityExponentTenThousandths": "0",
+    "DFIntRakNetApplicationFeedbackScaleUpFactorHundredthPercent": "0",
+    "DFIntNetworkStreamingGCUrgentMaxMicroSecondLimitPartsModels": "0",
+    "DFIntHumanoidStateChangeEventIngestThrottleHundrethsPercent": "1",
+    "DFIntHttpParallelLimit_RequestExperienceNotificationService": "0",
+    "DFIntDynamicTranslationSenderServerLRUMaxSizeBytes": "100000000",
+    "DFIntRakNetClockDriftAdjustmentPerPingMillisecond": "2139999999",
+    "DFIntDynamicTranslationSenderMaxBytesPerSecondClient": "1000000",
+    "DFIntDebugAdditionalNumberOfMipsToSkipForNonAlbedoTextures": "0",
+    "DFIntCloseReplicationDataAliveForAllHundredthsPercentage": "90",
+    "DFIntServerBandwidthPlayerSampleRateFacsOverride": "2147483647",
+    "DFIntBandwidthManagerFeedbackInfluxHundredthsPercentage": "100",
+    "DFIntGameNetPVHeaderRotationalVelocityZeroCutoffExponent": "-1",
+    "DFIntLocalizationTableAnalyticsSenderMaxClientQueueSize": "500",
+    "DFIntLocalizationTableAnalyticsSenderClientToHttpOffset": "-10",
+    "DFIntHttpRbxApiRequestsPerMinutePerPlayerInServerLimit": "150",
+    "DFIntVoiceChatMaxRecordedDataDeliveryIntervalMs": "2147483647",
+    "DFIntAnimatorRetargetInterpolateFKCorrectionMaxAngleDeg": "50",
+    "DFIntBgUpdateRedirectsHttpErrInfluxHundredthsPercentage": "70",
+    "DFIntBgUpdateRedirectsRejectInfluxHundredthsPercentage": "70",
+    "DFIntSimAdaptiveHumanoidPDControllerSubstepMultiplier": "150",
+    "DFIntDynamicTranslationSenderMaxEntriesPerRemoteEvent": "100",
+    "DFIntMegaReplicatorNetworkQualityProcessorUnit": "2147483647",
+    "DFIntAnimatorRetargetInterpolateFKCorrectionMinAngleDeg": "3",
+    "DFIntRakNetApplicationFeedbackInitialSpeedBPS": "2139999999",
+    "DFIntGameNetPVHeaderRotationOrientIdToleranceExponent": "-1",
+    "DFIntReportRecordingDeviceInfoRateHundredthsPercentage": "0",
+    "DFIntNetworkStreamingGCMaxMicroSecondLimitPartsModels": "0",
+    "DFIntDataSenderMaxJoinBandwidthBpsMultiplier": "2147483647",
+    "DFIntGraphicsOptimizationModePerformanceBiasPercent": "100",
+    "DFIntIncorrectlyPausedReplicationHundredthsPercentage": "0",
+    "DFIntRakNetApplicationFeedbackScaleUpThresholdPercent": "0",
+    "DFIntGameNetDontSendRedundantDeltaThresholdMillionth": "-1",
+    "DFIntGameNetPVHeaderLinearVelocityZeroCutoffExponent": "-1",
+    "DFIntRakNetResendScaleBackFactorHundredthsPercent": "6500",
+    "DFIntRaknetBandwidthInfluxHundredthsPercentageV2": "10000",
+    "DFIntSimLevitationAirModeFakeTurningImpulse": "1147483647",
+    "DFIntInterpolationFrameRotVelocityThresholdMillionth": "1",
+    "DFIntReportOutputDeviceInfoRateHundredthsPercentage": "0",
+    "DFIntCLI46794SendInputTelemetryHundredthsPercentage": "0",
+    "DFIntTimestepArbiterAccelerationModelFactorThou": "50000",
+    "DFIntDynamicTranslationSenderMaxEntrySizeBytes": "200000",
+    "DFIntThrottlingPredictionAccelerationHoldThousandth": "2",
+    "DFIntHumanoidFloorManualFrictionVelocityMultValue": "250",
+    "DFIntJoinDataItemEstimatedCompressionRatioHundreths": "0",
+    "DFIntTimestepArbiterAngAccelerationThresholdThou": "2000",
+    "DFIntBandwidthManagerApplicationDefaultBps": "2147483647",
+    "DFIntGameNetDontSendRedundantDeltaPositionMillionth": "0",
+    "DFIntRakNetApplicationFeedbackMaxSpeedBPS": "2139999999",
+    "DFIntReplicatorCountLimitInfluxHundrethsPercentage": "0",
+    "DFIntReplicatorVariantContainerCountLimit": "2147483647",
+    "DFIntGraphicsOptimizationModeMinFrameTimeTargetMs": "25",
+    "DFIntGraphicsOptimizationModeMaxFrameTimeTargetMs": "20",
+    "DFIntGameNetPVHeaderTranslationZeroCutoffExponent": "-1",
+    "DFIntDataSenderMaxBandwidthBpsMultiplier": "2147483647",
+    "DFIntBatchThumbnailAllowedExternalTimedOutRetries": "1",
+    "DFIntGraphicsOptimizationModeFRMFrameRateTarget": "144",
+    "DFIntPerformanceControlTextureQualityBestUtility": "-1",
+    "DFIntInterpolationFrameVelocityThresholdMillionth": "1",
+    "DFIntClusterSenderMaxUpdateBandwidthBpsScaling": "1000",
+    "DFIntNetworkClusterPacketCacheNumParallelTasks": "128",
+    "DFIntSignalRHubConnectionHeartbeatTimerRateMs": "1000",
+    "DFIntAnimatorRetargetSkipLowerBodyIKDistance10x": "50",
+    "DFIntGameNetCompressionLodByteBudgetThresholdPct": "0",
+    "DFIntNetworkStreamingGCUrgentMaxMicroSecondLimit": "0",
+    "DFIntBandwidthManagerDataSenderMaxWorkCatchupMs": "15",
+    "DFIntAirControllerTurningResponsiveness": "2147483647",
+    "DFIntReplicatorDataPingReportHundredthPercentage": "5",
+    "DFIntExperienceSignalsIngestMaxEventsPerBatch": "500",
+    "DFIntDebugLimitMinTextureResolutionWhenSkipMips": "4",
+    "DFIntClusterSenderMaxJoinBandwidthBpsScaling": "1000",
+    "DFIntMemoryUtilityCurveBaseHundrethsPercent": "10000",
+    "DFIntReplicatorVariantKickRateLimitMax": "2147483647",
+    "DFIntSimSolverImprovedPartialSleepAngularWeight": "0",
+    "DFIntClusterSenderMaxUpdateBandwidthBps": "100000000",
+    "DFIntHumanoidSimWorldReportPercentageHundredths": "1",
+    "DFIntMaxReceiveToDeserializeLatencyMilliseconds": "1",
+    "DFIntTrackCountryRegionAPIHundredthsPercent": "10000",
+    "DFIntClusterEstimatedCompressionRatioHundredths": "0",
+    "DFIntRakNetSelectUnblockSocketWriteDurationMs": "10",
+    "DFIntPhysicsAnalyticsHighFrequencyIntervalSec": "20",
+    "DFIntTouchSenderMaxBandwidthBpsScaling": "104857600",
+    "DFIntNetworkPhysicsSenderHaltReportThrottleHP": "10",
+    "DFIntReplicationVariantKickLimitBytes": "2147483647",
+    "DFIntSimSolverStatisticsHundrethsPercentage": "100",
+    "DFIntMaxNumReplicatorsToDisconnectPerFrame": "2000",
+    "DFIntCoreScriptsAnalyticsHundredthsPercentage": "0",
+    "DFIntHttpRbxApiRequestsPerMinuteServerLimit": "700",
+    "DFIntClusterSenderMaxJoinBandwidthBps": "100000000",
+    "DFIntSimSlidingVelocitySleepThreshold": "217483647",
+    "DFIntServerBandwidthPlayerSampleRate": "2147483647",
+    "DFIntTrackerDataSenderMaxBandwidthBps": "100000000",
+    "DFIntReplicationVariantLimitHundredthPercent": "0",
+    "DFIntPerformanceControlReportingPeriodInMs": "700",
+    "DFIntHttpRbxApiClientPerMinuteRequestLimit": "600",
+    "DFIntDefaultAnalyticsSenderMaxBytesPerSecond": "1",
+    "DFIntClientReplicatorStatsEventsThrottleHP": "100",
+    "DFIntParallelAdaptiveInterpolationBatchCount": "1",
+    "DFIntHACDPointSampleDistApartTenths": "2147483647",
+    "DFIntClientNetworkInfluxHundredthsPercentage": "0",
+    "DFIntBatchThumbnailExponentialInitialWaitMs": "20",
+    "DFIntServerAutomaticNetworkOwnershipBufferMs": "0",
+    "DFIntSignalRHubConnectionConnectTimeoutMs": "7000",
+    "DFIntClientPacketUnhealthyContEscMsPerSecond": "1",
+    "DFIntReportHumanoidRigPercentageHundredths": "100",
+    "DFIntReplicatorDataPingReportThrottleSeconds": "5",
+    "DFIntSimSolverImprovedPartialSleepTolerance": "0",
+    "DFIntRaknetBandwidthPingSendEveryXSeconds": "300",
+    "DFIntLargeDataSenderMaxBandwidthBps": "100000000",
+    "DFIntDataSenderMaxJoinBandwidthBps": "2147483647",
+    "DFIntSimCSG3DCDRecomputeTotalWaitMiliSec": "5000",
+    "DFIntReplicatorDataPingReportThresholdMs": "5000",
+    "DFIntClientPacketHealthyAllocationPercent": "100",
+    "DFIntPerformanceControlFrameTimeMaxUtility": "-1",
+    "DFIntNetworkDataSenderHaltReportThrottleHP": "10",
+    "DFIntPhysicsSenderMaxBandwidthBpsScaling": "240",
+    "DFIntMaxInterpolationRecursionsBeforeCheck": "1",
+    "DFIntReplicationDataCacheNumParallelTasks": "16",
+    "DFIntTimeBetweenSendConnectionAttemptsMS": "200",
+    "DFIntPhysicsSenderMaxBandwidthBps": "2147483647",
+    "DFIntRakNetResendMaxThresholdTimeInUs": "300000",
+    "DFIntLargeDataSenderMinBandwidthBps": "10000000",
+    "DFIntNetworkStreamingGCMaxMicroSecondLimit": "0",
+    "DFIntBatchThumbnailExperiationTimeSeconds": "10",
+    "DFIntAnimationLodFacsVisibilityDenominator": "0",
+    "DFIntNetworkInProcessLimitGameplayMsClient": "1",
+    "DFIntCSGLevelOfDetailSwitchingDistanceL34": "0",
+    "DFIntCSGLevelOfDetailSwitchingDistanceL23": "0",
+    "DFIntCSGLevelOfDetailSwitchingDistanceL12": "0",
+    "DFIntVisibilityCheckRayCastLimitPerFrame": "10",
+    "DFIntSignalRHubConnectionBaseRetryTimeMs": "50",
+    "DFIntMemoryUtilityCurveTotalMemoryReserve": "0",
+    "DFIntSimConstraintDataCollectionRate3": "36420",
+    "DFIntHumanoidFloorTeleportWeightValue": "10000",
+    "DFIntInitialAccelerationLatencyMultTenths": "1",
+    "DFIntSimDefaultHumanoidTimestepMultiplier": "8",
+    "DFIntRakNetResendMinThresholdTimeInUs": "80000",
+    "DFIntHttpBatchApi_MaxBatchesSentPerCyle": "10",
+    "DFIntInterpolationNumMechanismsBatchSize": "1",
+    "DFIntAudioOcclusionMaxNumQueriesPerFrame": "6",
+    "DFIntDownloadEpisodeTimerFreqeuncyInMs": "100",
+    "DFIntHttpCurlConnectionCacheSize": "134217728",
+    "DFIntInterpolationNumMechanismsPerTask": "100",
+    "DFIntBatchThumbnailMaxExponentialRetries": "2",
+    "DFIntClientPacketHealthyMsPerSecondLimit": "1",
+    "DFIntMaximumFreefallMoveTimeInTenths": "1000",
+    "DFIntAudioOcclusionMaxPiercedPrimitives": "6",
+    "DFIntHttpRbxApiMaxRetryBudgetPerMinute": "20",
+    "DFIntDataSenderMaxBandwidthBps": "2147483647",
+    "DFIntHumanoidMassScaleThresholdThou2": "1000",
+    "DFIntNetworkQualityResponderMaxWaitTime": "5",
+    "DFIntCachedPatchLoadDelayMilliseconds": "400",
+    "DFIntGameNetLocalSpaceMaxSendIndex": "100000",
+    "DFIntTouchSenderMaxBandwidthBps": "104857600",
+    "DFIntMaxProcessPacketsStepsPerCyclic": "5000",
+    "DFIntRemoteEventAbuseReportRateLimitMax": "1",
+    "DFIntSimOwnedNOUCountThresholdMillionth": "0",
+    "DFIntReplicatorJdiReportThrottlePercent": "0",
+    "DFIntOcclusionFresnelConsensusNumerator": "2",
+    "DFIntHttpRbxApiMaxThrottledQueueSize": "100",
+    "DFIntMaxProcessPacketsStepsAccumulated": "0",
+    "DFIntHumanoidMassScaleThresholdThou": "1000",
+    "DFIntSendGameServerDataMaxLen": "2147483647",
+    "DFIntNumTrackerDataToReplicatePerFrame": "4",
+    "DFIntNumFramesToKeepAfterInterpolation": "1",
+    "DFIntPhysicsNOUCountHundredth": "2147483647",
+    "DFIntCSGLevelOfDetailSwitchingDistance": "0",
+    "DFIntSignalRCoreKeepAlivePingPeriodMs": "25",
+    "DFIntGameNetDontSendRedundantNumTimes": "-1",
+    "DFIntSignalRCoreRpcQueueSize": "2147483647",
+    "DFIntHttpBatchApi_bgRefreshMaxDelayMs": "5",
+    "DFIntUserIdPlayerNameCacheSize": "33554432",
+    "DFIntBatchThumbnailJobRunsPerSecond": "500",
+    "DFIntNetworkProcessPacketThresholdMs": "-1",
+    "DFIntSendRakNetStatsInterval": "2147483647",
+    "DFIntSignalRCoreHandshakeTimeoutMs": "3000",
+    "DFIntStandardHumanoidAssyMassThou": "15999",
+    "DFIntCrashUploadToBacktracePercentage": "0",
+    "DFIntMaxAverageFrameDelayExceedFactor": "3",
+    "DFIntDebugPerformanceControlFrameTime": "2",
+    "DFIntWaitOnUpdateNetworkLoopEndedMS": "100",
+    "DFIntClientPacketMaxFrameMicroseconds": "1",
+    "DFIntSimCSG3DCDRecomputeThreashold": "150",
+    "DFIntPhysicsReceiveNumParallelTasks": "12",
+    "DFIntRagdollEarlyExitTimeTenthSecond": "1",
+    "DFIntHttpRbxApiJobFrequencyInSeconds": "1",
+    "DFIntLargePacketQueueSizeCutoffMB": "1000",
+    "DFIntMicroProfilerDpiScaleOverride": "100",
+    "DFIntRakNetPingFrequencyMillisecond": "10",
+    "DFIntItemSenderApiExMaxSizeKB": "50000000",
+    "DFIntStandardHumanoidAssyMOIThou": "31000",
+    "DFIntMaxProcessPacketsJobScaling": "10000",
+    "DFIntAnimatorThrottleMaxFramesToSkip": "1",
+    "DFIntFrameRateMSToReduceTouchEvents": "30",
+    "DFIntSignalRHeartbeatIntervalSeconds": "1",
+    "DFIntHttpRbxApiSyncRetryWaitTimeMSec": "5",
+    "DFIntRakNetStaleSendQueueTriggerMs": "250",
+    "DFIntMegaReplicatorNumParallelTasks": "12",
+    "DFIntMemoryUtilityCurveNumSegments": "100",
+    "DFIntNetworkSchemaCompressionRatio": "100",
+    "DFIntInterpolationNumParallelTasks": "16",
+    "DFIntSignalRCoreServerTimeoutMs": "20000",
+    "DFIntRakNetResendBufferArrayLength": "32",
+    "DFIntNumFramesAllowedToBeAboveError": "0",
+    "DFIntSkipSomePropertiesPermyriad": "5000",
+    "DFIntBatchThumbnailResultsSizeCap": "200",
+    "DFIntSoundVelocitySmoothingNewRatio": "2",
+    "DFIntRagdollDefaultTimerTenthSecond": "1",
+    "DFIntClientPacketExcessMicroseconds": "1",
+    "DFIntSoundVelocitySmoothingOldRatio": "5",
+    "DFIntDebugSendDistInSteps": "-2147483648",
+    "DFIntHttpRbxApiMaxRetryQueueSize": "1000",
+    "DFIntPerformanceControlFrameTimeMax": "1",
+    "DFIntNumAssetsMaxToPreload": "2147483647",
+    "DFIntTaskSchedulerJobInGameThreads": "12",
+    "DFIntRakNetNakResendDelayRttPercent": "0",
+    "DFIntMaxDataPacketPerSend": "2147483647",
+    "DFIntSignalRCoreHubMaxBackoffMs": "5000",
+    "DFIntOcclusionShelfScalarNumerator": "2",
+    "DFIntVoiceChatVolumeThousandths": "5000",
+    "DFIntSimCSG3DCDMaxNumConvexHulls": "500",
+    "DFIntInterpolationMinAssemblyCount": "1",
+    "DFIntHttpRbxApiMaxBudgetMultiplier": "2",
+    "DFIntVoiceChatRollOffMaxDistance": "300",
+    "DFIntVideoMaxNumberOfVideosPlaying": "0",
+    "DFIntSignalRCoreHubMaxElapsedMs": "5000",
+    "DFIntNetworkQualityResponderUnit": "10",
+    "DFIntDebugFRMQualityLevelOverride": "2",
+    "DFIntBufferCompressionThreshold": "100",
+    "DFIntOcclusionGainScalarNumerator": "2",
+    "DFIntMinimumNumberMechanismsForMT": "1",
+    "DFIntTaskSchedulerJobInitThreads": "12",
+    "DFIntTargetTimeDelayFacctorTenths": "1",
+    "DFIntAuroraClientInputBufferSize": "1",
+    "DFIntCliTcMaxPayloadRcv": "2147483647",
+    "DFIntRagdollSlowEnoughToNotTenth": "1",
+    "DFIntVoiceChatRollOffMinDistance": "1",
+    "DFIntRccTcMaxPayloadSnd": "2147483647",
+    "DFIntCliTcMaxPayloadSnd": "2147483647",
+    "DFIntRuntimeConcurrency": "2139999999",
+    "DFIntAuroraServerInputBufferSize": "1",
+    "DFIntRccTcMaxPayloadRcv": "2147483647",
+    "DFIntStartupTracingInfluxRollout": "0",
+    "DFIntAnimationLodFacsDistanceMax": "0",
+    "DFIntClientPacketMinMicroseconds": "1",
+    "DFIntCodecMaxIncomingPackets": "10000",
+    "DFIntWaitOnRecvFromLoopEndedMS": "100",
+    "DFIntRenderLocalLightUpdatesMax": "16",
+    "DFIntAnimationLodFacsDistanceMin": "0",
+    "DFIntTaskSchedulerTargetFps": "999999",
+    "DFIntCodecMaxOutgoingFrames": "10000",
+    "DFIntRenderingThrottleDelayInMS": "1",
+    "DFIntHttpBatchApi_cacheDelayMs": "15",
+    "DFIntPreloadTextureTimeBuget": "5000",
+    "DFIntRenderLocalLightFadeInMs": "500",
+    "DFIntInterpolationDtLimitForLod": "1",
+    "DFIntOcclusionFresnelEllipsoids": "6",
+    "DFIntAudioOcclusionUpdateRateMs": "2",
+    "DFIntSignalRCoreHubBaseRetryMs": "10",
+    "DFIntRccMaxPayloadRcv": "2147483647",
+    "DFIntRakNetMtuValue1InBytes": "1396",
+    "DFIntRccMaxPayloadSnd": "2147483647",
+    "DFIntCliMaxPayloadRcv": "2147483647",
+    "DFIntActionStationDebounceTime": "0",
+    "DFIntRakNetMtuValue3InBytes": "1100",
+    "DFIntCliMaxPayloadSnd": "2147483647",
+    "DFIntAccelerationTimeThreshold": "0",
+    "DFIntRakNetMtuValue2InBytes": "1150",
+    "DFIntHttpRbxApiMaxSyncRetries": "30",
+    "DFIntRakNetSocketSendTimeoutMs": "1",
+    "DFIntRakNetNakResendDelayMsMax": "0",
+    "DFIntRakNetMinAckGrowthPercent": "0",
+    "DFIntCanHideGuiGroupId": "32380007",
+    "DFIntMaxAcceptableUpdateDelay": "1",
+    "DFIntHttpRbxApiMaxRetryCount": "30",
+    "DFIntNetworkStreamMinGrowSize": "0",
+    "DFIntJoinDataCompressionLevel": "0",
+    "DFIntAssetPreloading": "2147483647",
+    "DFIntConnectingTimerInterval": "10",
+    "DFIntServerFramesBetweenJoins": "1",
+    "DFIntDefaultTimeoutTimeMs": "10000",
+    "DFIntBatchThumbnailMaxReqests": "3",
+    "DFIntBatchThumbnailMinWaitMs": "1",
+    "DFIntDebugRestrictGCDistance": "1",
+    "DFIntSendRakNetStatsThrottle": "2",
+    "DFIntHttpBatchApi_maxWaitMs": "40",
+    "DFIntClusterCompressionLevel": "0",
+    "DFIntBatchThumbnailMaxWaitMs": "3",
+    "DFIntDebugSimPrimalStiffness": "0",
+    "DFIntRakNetResendRttMultiple": "2",
+    "DFIntSchemaNetworkStreamSize": "0",
+    "DFIntDataSenderRate": "2147483647",
+    "DFIntClientPacketMaxDelayMs": "1",
+    "DFIntHttpBatchApi_bgDelayMs": "1",
+    "DFIntBufferCompressionLevel": "0",
+    "DFIntRakNetNakResendDelayMs": "0",
+    "DFIntHttpBatchApi_minWaitMs": "5",
+    "DFIntTextureQualityOverride": "1",
+    "DFIntSimCSG3DcdMaxContacts": "32",
+    "DFIntTaskSchedulerThreadMin": "6",
+    "DFIntRingingTimerInterval": "10",
+    "DFIntNetworkStreamInitSize": "0",
+    "DFIntS2PhysicsSenderRate": "512",
+    "DFIntRakNetSelectTimeoutMs": "1",
+    "DFIntBatchThumbnailLimit": "128",
+    "DFIntHttpBatchApi_maxReqs": "5",
+    "DFIntVoiceChatRollOffMode": "2",
+    "DFIntPredictedOOMPercent": "0",
+    "DFIntConnectionMTUSize": "900",
+    "DFIntMaxFrameBufferSize": "10",
+    "DFIntSignalRCoreTimerMs": "50",
+    "DFIntRenderShadowmapBias": "0",
+    "DFIntCharacterLoadTime": "1",
+    "DFIntMaxFramesToSend": "1",
+    "DFIntNetworkCluster": "0",
+    "DFIntSendItemLimit": "5",
+    "DFIntSSAOMipLevels": "2",
+    "DFIntRakNetLoopMs": "1",
+    "DFIntSSAO": "2",
 
--- 🔵 3. SISTEMA DE SEGURANÇA (CORE) ---------------------------------------------------------
+    "DFLogNetworkSenderStallTracking": "0",
+    "DFLogSignalRCoreNetworkHandler": "0",
+    "DFLogNetworkSocketSendError": "0",
+    "DFLogNetworkPacketsReceive": "0",
+    "DFLogBatchAssetApiLog": "3",
+    "DFLogHttpTraceError": "0",
+    "DFLogHttpTraceLight": "0",
+    "DFLogHttpTrace": "0",
 
--- 3.1 SafeCharacter: Funciona em QUALQUER jogo/rig
-local SafeChar = {}
-function SafeChar:GetHumanoid(char)
-    char = char or player.Character
-    if not char then return nil end
-    -- Procura Humanoid ou Controller (Custom Rig) - Recursivo (true) pega em qualquer profundidade
-    return char:FindFirstChildOfClass("Humanoid") or char:FindFirstChildWhichIsA("Humanoid", true)
-end
-function SafeChar:GetRootPart(char)
-    char = char or player.Character
-    if not char then return nil end
-    local hum = self:GetHumanoid(char)
-    if hum and hum.RootPart then return hum.RootPart end -- R15/R6 Standard
-    -- Fallback: Procura Part nomeada ou BasePart principal
-    return char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso") or char:FindFirstChildWhichIsA("BasePart")
-end
-function SafeChar:GetCharacter()
-    return player.Character or player.CharacterAdded:Wait()
-end
+    "DFStringAnalyticsNS1BeaconConfig": "https://127.0.0.1:443/|g2hjxw|https://127.0.0.1:443/|g2g5dg|https://127.0.0.1:443/|148d53m",
+    "DFStringLocalizationTableAnalyticsSenderImplementationAnalyticsSuffix": "2",
+    "DFStringCrashUploadToBacktraceWindowsPlayerToken": "null",
+    "DFStringCrashUploadToBacktraceMacPlayerToken": "null",
+    "DFStringAnalyticsEventStreamUrlEndpoint": "opt-out",
+    "DFStringLightstepHTTPTransportUrlHost": "null",
+    "DFStringLightstepHTTPTransportUrlPath": "null",
+    "DFStringCrashUploadToBacktraceBaseUrl": "null",
+    "DFStringAnalyticsNS1ApplicationId": "opt-out",
+    "DFStringRobloxAnalyticsSubDomain": "opt-out",
+    "DFStringDefaultAvatarDeathType": "Ragdoll",
+    "DFStringAltHttpPointsReporterUrl": "null",
+    "DFStringHttpPointsReporterUrl": "null",
+    "DFStringRobloxAnalyticsURL": "null",
+    "DFStringTelemetryV2Url": "null",
+    "DFStringLightstepToken": "null",
 
--- 3.2 Watchdog: Auto-desliga feature se der erro (Segurança Total)
-local Watchdog = {}
-Watchdog.Errors = {}
-Watchdog.MaxErrors = 3 -- Tolerância
-Watchdog.ActiveLoops = {} -- [name] = thread/connection
+    "DisablePostFx": "True",
 
-function Watchdog:Wrap(name, func, interval)
-    interval = interval or 0 -- 0 = Heartbeat (RenderStepped/Heartbeat), >0 = Segundos
-    local thread
-    local errorCount = 0
-    local connection
+    "DoNotSkipMipsBasedOnSystemMemoryPS": "True",
 
-    local function runner(dt)
-        -- Checa Flag de forma segura (CONFIG._Flags pode não existir ainda no init)
-        if CONFIG._Flags[name] == false then 
-            if connection then connection:Disconnect() end
-            if thread then task.cancel(thread) end
-            return 
-        end
-        
-        local ok, err = pcall(func, dt)
-        if not ok then
-            errorCount += 1
-            warn(`[WATCHDOG] ${name} Error [${errorCount}/${Watchdog.MaxErrors}]: ${err}`)
-            if errorCount >= Watchdog.MaxErrors then
-                self:ForceDisable(name, `Erro crítico: ${err}`)
-            end
-        else
-            errorCount = 0 -- Reset se sucesso
-        end
-    end
+    "EnablePowerTraceModule": "True",
 
-    if interval > 0 then
-        -- Loop com task.wait (Não consome Heartbeat desnecessariamente)
-        thread = task.spawn(function()
-            while true do
-                task.wait(interval)
-                -- Checa se ainda deve rodar (pode ter sido desligado durante o wait)
-                if CONFIG._Flags[name] == false then break end
-                runner(interval)
-            end
-        end)
-        Watchdog.ActiveLoops[name] = thread
-    else
-        -- Loop Heartbeat (Para coisas que precisam de frame perfeito: Noclip, Fly, FreeCam)
-        connection = RunService.Heartbeat:Connect(runner)
-        Watchdog.ActiveLoops[name] = connection
-    end
-    return Watchdog.ActiveLoops[name]
-end
+    "FFlagFacialAnimationStreamingServiceUniverseSettingsEnableAudio": "False",
+    "FFlagFacialAnimationStreamingServiceUniverseSettingsEnableVideo": "False",
+    "FFlagFacialAnimationStreamingServiceUserSettingsOptInAudio": "False",
+    "FFlagFacialAnimationStreamingServiceUserSettingsOptInVideo": "False",
+    "FFlagPerformanceControlEnablePortTextureManagerTrimMemory": "True",
+    "FFlagHumanoidDefaultReplaceUnsafeBlockingLoadInstance": "True",
+    "FFlagToastNotificationsReceivedAndDismissedSignals": "False",
+    "FFlagNotificationButtonTypeVariantMappingEmphasis": "False",
+    "FFlagDebugNextGenReplicatorEnabledWriteCFrameColor": "true",
+    "FFlagFixTextureCompositorFramebufferManagement2": "True",
+    "FFlagGraphicsGLEnableSuperHQShadersExclusion": "False",
+    "FFlagToastNotificationsResendDisplayOnInit": "False",
+    "FFlagLocServicePerformanceAnalyticsEnabled": "False",
+    "FFlagEnableZstdDictionaryForClientSettings": "False",
+    "FFlagAnimatorRetargetSkipAnkleModification": "true",
+    "FFlagSpecifyNetworkReplicatorScopeForItems": "True",
+    "FFlagContentProviderPreloadHangTelemetry": "False",
+    "FFlagToastNotificationsUpdateEventParams": "False",
+    "FFlagEnableRemoveIsFromToastNotification": "False",
+    "FFlagUserCameraControlLastInputTypeUpdate": "True",
+    "FFlagVideoServiceAddHardwareCodecMetrics": "True",
+    "FFlagRobloxTelemetryEnableSenderCallback": "True",
+    "FFlagGraphicsGLEnableHQShadersExclusion": "False",
+    "FFlagToastNotificationsProtocolEnabled2": "False",
+    "FFlagLuaAppGamesPagePreloadingDisabled": "False",
+    "FFlagFixCountOfUnreadNotificationError": "False",
+    "FFlagTaskSchedulerLimitTargetFpsTo2402": "False",
+    "FFlagPhysicsMechanismCacheOptimizeAlloc": "True",
+    "FFlagRenderEnableGlobalInstancingD3D11": "False",
+    "FFlagISRDontReplicateHumanoidSeatStuff": "True",
+    "FFlagHandleAltEnterFullscreenManually": "False",
+    "FFlagEnableClickToMoveUsageTelemetry2": "False",
+    "FFlagRenderEnableGlobalInstancingD3D10": "True",
+    "FFlagRemovedRbxRenderingPreProcessor": "False",
+    "FFlagDebugEnableDirectAudioOcclusion2": "True",
+    "FFlagHumanoidStateUseRuntimeSyncPrims": "True",
+    "FFlagLuaAppLegacyInputSettingRefactor": "True",
+    "FFlagEnableBubbleChatFromChatService": "False",
+    "FFlagHumanoidGuidAsCompositeCacheKey2": "True",
+    "FFlagGameBasicSettingsFramerateCap5": "False",
+    "FFlagVoiceChatSendInitialBatchEmpty": "False",
+    "FFlagDebugGraphicsDisableDirect3D11": "False",
+    "FFlagHumanoidSkipMeshPartJointOffset": "True",
+    "FFlagWindowsReportAbuseNotification": "False",
+    "FFlagUserSoundsUseRelativeVelocity2": "True",
+    "FFlagNextGenReplicatorEnabledRead3": "False",
+    "FFlagDebugRenderingSetDeterministic": "True",
+    "FFlagEnableNetworkChangeTelemtry2": "False",
+    "FFlagHumanoidRigDescriptionEnabled": "True",
+    "FFlagSpecifyNetworkReplicatorScope": "True",
+    "FFlagDebugRenderCollectGpuCounters": "True",
+    "FFlagDebugGraphicsGLDisableDiscard": "True",
+    "FFlagUseNotificationsLocalization": "False",
+    "FFlagDebugGraphicsDisableVulkan11": "True",
+    "FFlagAnimationClipMemCacheEnabled": "True",
+    "FFlagEnableZstdForClientSettings": "False",
+    "FFlagDebugForceFSMCPULightCulling": "True",
+    "FFlagDebugGraphicsPreferD3D11FL10": "True",
+    "FFlagHumanoidOnlyStepInWorkspace": "False",
+    "FFlagDebugDeterministicParticles": "False",
+    "FFlagGraphicsCheckComputeSupport": "True",
+    "FFlagEnableChildrenLockFromLua2": "False",
+    "FFlagDebugGraphicsPreferVulkan": "False",
+    "FFlagEnableChildrenLockFromLua": "False",
+    "FFlagPreloadTextureItemsOption4": "True",
+    "FFlagGraphicsEnableD3D10Compute": "True",
+    "FFlagRenderGpuTextureCompressor": "True",
+    "FFlagUserUpdateInputConnections": "True",
+    "FFlagSkipReadDiskCacheRedirects": "True",
+    "FFlagDebugGraphicsDisableVulkan": "True",
+    "FFlagDebugGraphicsDisableOpenGL": "True",
+    "FFlagHighlightOutlinesOnMobile": "True",
+    "FFlagUserFixLoadAnimationError": "True",
+    "FFlagDebugLightGridShowChunks": "False",
+    "FFlagDebugGraphicsPreferOpenGL": "True",
+    "FFlagSoundsUsePhysicalVelocity": "True",
+    "FFlagGraphicsFixMsaaInGuiScene": "True",
+    "FFlagUserCameraInputRefactor3": "True",
+    "FFlagDebugGraphicsPreferD3D11": "True",
+    "FFlagQuaternionPoseCorrection": "True",
+    "FFlagProcessEventQueueOnInput": "True",
+    "FFlagLargeReplicatorEnabled9": "True",
+    "FFlagDebugForceChatDisabled": "False",
+    "FFlagDebugSkipMeshVoxelizer": "True",
+    "FFlagUserShowGuiHideToggles": "True",
+    "FFlagEnableCameraByDefault": "False",
+    "FFlagDebugForceGenerateHSR": "True",
+    "FFlagEnableQuickGameLaunch": "True",
+    "FFlagLargeReplicatorWrite5": "True",
+    "FFlagFastGPULightCulling3": "True",
+    "FFlagGuiHidingApiSupport2": "True",
+    "FFlagOptimizePartsInPart": "True",
+    "FFlagAssetPreloadingIXP": "True",
+    "FFlagReconnectDisabled": "True",
+    "FFlagUserCameraInputDt": "True",
+    "FFlagSmoothInputOffset": "True",
+    "FFlagLatencyLogging1": "false",
+    "FFlagDebugDisplayFPS": "True",
+    "FFlagDebugSSAOForce": "False",
+    "FFlagDebugGraphics": "False",
+    "FFlagAddDMLogging": "False",
+    "FFlagGraphicsASTC": "True",
+    "FFlagDebugSkyGray": "true",
+    "FFlagLuauCodegen": "True",
 
-function Watchdog:ForceDisable(flagName, reason)
-    if CONFIG._Flags[flagName] == false then return end -- Já desligado
-    CONFIG._Flags[flagName] = false
-    CONFIG[flagName] = false -- Sincroniza config principal
-    
-    -- Atualiza UI Rayfield se existir
-    if Rayfield.Flags and Rayfield.Flags[flagName] then
-        pcall(function() Rayfield.Flags[flagName]:Set(false) end)
-    end
-    Notify("🛡️ SEGURANÇA ATIVADA", flagName .. " desligado automaticamente.\nMotivo: " .. reason, 6, "ERROR")
-    print(`[SAFETY] ${flagName} DISABLED: ${reason}`)
-end
+    "FIntOptimizedContactPipelineSpatialHashOverlapToleranceMicro": "5000",
+    "FIntGetHumanoidDescriptionFromUserIdThrottleCountPerMinute": "3000",
+    "FIntFastClusterHumanoidWorstCaseGeometryDataBytes": "15291456",
+    "FIntGraphicsOptimizationModeMaxFrameTimeTargetMs": "16",
+    "FIntInterpolationAwareTargetTimeLerpHundredth": "100",
+    "FIntEmotesAnimationsPerPlayerCacheSize": "16777216",
+    "FIntMeshContentProviderForceCacheSize": "268435456",
+    "FIntRenderMaxShadowAtlasUsageBeforeDownscale": "1",
+    "FIntFastClusterHumanoidWorstCaseBytes": "15291456",
+    "FIntSmoothClusterTaskQueueMaxParallelTasks": "12",
+    "FIntSmoothTerrainPhysicsCacheSize": "2147483647",
+    "FIntHSRClusterSymmetryDistancePercent": "10000",
+    "FIntRakNetDatagramMessageIdArrayLength": "256",
+    "FIntHumanoidParallelMultiSubmitBatchSize": "2",
+    "FIntRakNetResendBufferArrayLength": "1600200",
+    "FIntCoordinatorPlannerStepsPerIteration": "8",
+    "FIntSmoothMouseSpringFrequencyTenths": "100",
+    "FIntMaquettesFrameRateBufferPercentage": "4",
+    "FIntTaskSchedulerMaxNumOfJobs": "2139999999",
+    "FIntFriendRequestNotificationThrottle": "0",
+    "FIntDebugFRMOptionalMSAALevelOverride": "0",
+    "FIntSimSolverResponsiveness": "2147483647",
+    "FIntFastClusterUpdateWaitingBudgetMs": "2",
+    "FIntUITextureMaxRenderTextureSize": "2048",
+    "FIntGrassMovementReducedMotionFactor": "0",
+    "FIntGraphicsTextureReductionD3D11": "100",
+    "FIntHumanoidParallelMinParallelSize": "2",
+    "FIntFixForBulkPresenceNotifications": "0",
+    "FIntDirectionalAttenuationMaxPoints": "1",
+    "FIntRuntimeMaxNumOfSemaphores": "4000000",
+    "FIntRenderMeshOptimizeVertexBuffer": "1",
+    "FIntSimWorldTaskQueueParallelTasks": "6",
+    "FIntRuntimeMaxNumOfConditions": "20000",
+    "FIntVertexSmoothingGroupTolerance": "1",
+    "FIntActivatedCountTimerMSKeyboard": "0",
+    "FIntTextureCompositorLowResFactor": "4",
+    "FIntRuntimeMaxNumOfSchedulers": "20000",
+    "FIntTaskSchedulerAutoThreadLimit": "8",
+    "FIntTerrainOTAMaxTextureSize": "2048",
+    "FIntSimCSG3DCDRecomputeStrategy": "1",
+    "FIntDebugTextureManagerSkipMips": "4",
+    "FIntNumFramesToCaptureCallStack": "1",
+    "FIntLuaGcParallelMinMultiTasks": "12",
+    "FIntHumanoidParallelThreadMax": "92",
+    "FIntRenderLocalLightUpdatesMax": "1",
+    "FIntRuntimeMaxNumOfThreads": "20000",
+    "FIntRenderLocalLightUpdatesMin": "1",
+    "FIntRuntimeMaxNumOfLatches": "20000",
+    "FIntRenderLocalLightFadeInMs": "100",
+    "FIntCameraMaxZoomDistance": "999999",
+    "FIntActivatedCountTimerMSMouse": "0",
+    "FIntRuntimeMaxNumOfMutexes": "20000",
+    "FIntActivatedCountTimerMSTouch": "1",
+    "FIntInterpolationMaxDelayMSec": "0",
+    "FIntDefaultMeshCacheSizeMB": "128",
+    "FIntUnifiedLightingBlendZone": "2",
+    "FIntRenderTextureCompositor": "0",
+    "FIntUITextureMaxUpdateDepth": "2",
+    "FIntReplicationDataLifetime": "1",
+    "FIntReportDeviceInfoRollout": "0",
+    "FIntRobloxGuiBlurIntensity": "0",
+    "FIntTaskSchedulerThreadMin": "3",
+    "FIntTerrainArraySliceSize": "0",
+    "FIntDebugForceMSAASamples": "1",
+    "FIntRenderShadowmapBias": "-1",
+    "FIntFRMMaxGrassDistance": "0",
+    "FIntTargetRefreshRate": "144",
+    "FIntFRMMinGrassDistance": "0",
+    "FIntLmsClientRollout2": "0",
+    "FIntFontSizePadding": "2",
+    "FIntSSAOMipLevels": "2",
+    "FIntGraphics": "0",
+    "FIntSSAO": "1",
 
-function Watchdog:Stop(name)
-    local loop = Watchdog.ActiveLoops[name]
-    if loop then
-        if type(loop) == "thread" then task.cancel(loop) else pcall(function() loop:Disconnect() end) end
-        Watchdog.ActiveLoops[name] = nil
-    end
-end
+    "FLogGraphicsDisableUnalignedDxtGPUNameBlacklist": "True",
+    "FLogIXPGraphicsOptimizationModePerformanceScale": "100",
+    "FLogGraphicsGLGpuExcludeListSuperHQShaders": "True",
+    "FLogIXPGraphicsOptimizationModeQualityScale": "0",
+    "FLogNetwork": "7",
 
--- 3.3 VirtualInput (Cliques/Teclas REAIS - Anti-Cheat Bypass)
-local VInput = {}
-function VInput:Click(x, y, button)
-    button = button or 0 -- 0=Left, 1=Right
-    pcall(function()
-        VirtualInputManager:SendMouseButtonEvent(x, y, button, true, game, 0)
-        task.wait(0.02)
-        VirtualInputManager:SendMouseButtonEvent(x, y, button, false, game, 0)
-    end)
-end
-function VInput:KeyDown(keyCode)
-    pcall(function() VirtualInputManager:SendKeyEvent(true, keyCode, false, game) end)
-end
-function VInput:KeyUp(keyCode)
-    pcall(function() VirtualInputManager:SendKeyEvent(false, keyCode, false, game) end)
-end
-function VInput:PressKey(keyCode, duration)
-    duration = duration or 0.05
-    self:KeyDown(keyCode)
-    task.wait(duration)
-    self:KeyUp(keyCode)
-end
+    "FStringErrorUploadToBacktraceBaseUrl": "http://opt-out.roblox.com",
+    "FStringIXPGraphicsOptimizationModePerformanceScale": "100",
+    "FStringPerformanceSendMeasurementAPISubdomain": "opt-out",
+    "FStringRemoteAnimationSmoothingStrategy": "Extrapolation",
+    "FStringIXPGraphicsOptimizationModeQualityScale": "100",
+    "FStringGetPlayerImageDefaultTimeout": "1",
 
--- 3.4 Anti-Kick UI (Impede tela de "You were kicked" local)
--- Proteção pcall para executores sem hookfunction (ex: Delta antigo)
-local OldKick
-pcall(function()
-    OldKick = hookfunction(player.Kick, function(self, msg)
-        if self == player then
-            warn("[ANTI-KICK] Kick local bloqueado:", msg)
-            Notify("🛡️ Anti-Kick", "Tentativa de kick local bloqueada:\n" .. tostring(msg), 5, "WARNING")
-            return -- Não desconecta
-        end
-        return OldKick(self, msg)
-    end)
-end)
+    "IncludePowerSaverMode": "True",
 
-local OldTeleport
-pcall(function()
-    OldTeleport = hookfunction(TeleportService.TeleportToPlaceInstance, function(self, placeId, jobId, plr)
-        if plr == player then
-            warn("[ANTI-TP] Teleport suspeito bloqueado.")
-            return
-        end
-        return OldTeleport(self, placeId, jobId, plr)
-    end)
-end)
+    "PerformanceControlTextureQualityBestUtility": "-1",
 
--- 🔵 4. CONFIGURAÇÃO POR JOGO (PlaceId) ----------------------------------------------------
-local CONFIG_PATH = `UniversalHub_Config_${PlaceId}.json`
-local CONFIG = {
-    -- Movement
-    WalkSpeed = 16, JumpPower = 50, Gravity = 1,
-    InfiniteJump = false, Noclip = false, Spin = false, SpinSpeed = 10, Sit = false,
-    -- Fly (VirtualInput Based)
-    Fly = false, FlySpeed = 50, FlyUpKey = Enum.KeyCode.Space, FlyDownKey = Enum.KeyCode.LeftShift,
-    -- Visuals
-    ESP = false, Fullbright = false, NoFog = false, FOV = 70, FreeCam = false,
-    -- Utility
-    AntiAFK = false, AntiLag = false, ClickTP = false,
-    -- Internal
-    _Flags = {}, -- Espelho das Toggles para Watchdog
-    VelocidadeGlobal = 1000, AplicarVelocidade = false, LimiteVelocidade = 1000
+    "RenderUseTextureManager224": "False",
+
+    "TaskSchedulerLimitTargetFpsTo2402": "False",
+    "TaskSchedulerTargetFps": "9999999",
+
+    "TerrainArraySliceSize": "0",
+
+    "TextureQualityOverrideEnabled": "True",
+    "TextureQualityOverride": "0",
+
+    "TM2SkipMipsForUnstreamable2": "True"
 }
-
-local ESP_Highlights = {}
-local FlyConnection
-local FreeCamConn
-local FreeCamEnabled = false
-local FreeCamCFrame = CFrame.new()
-local Connections = {}
-
--- Load/Save
-local function SaveConfig()
-    local data = {}
-    for k,v in pairs(CONFIG) do 
-        if type(v) ~= "function" and k:sub(1,1) ~= "_" then data[k]=v end 
-    end
-    pcall(function() 
-        if writefile then writefile(CONFIG_PATH, HttpService:JSONEncode(data)) end 
-    end)
-end
-
-local function LoadConfig()
-    if not (readfile and isfile and isfile(CONFIG_PATH)) then return end
-    local ok, data = pcall(function() return HttpService:JSONDecode(readfile(CONFIG_PATH)) end)
-    if ok and data then 
-        for k,v in pairs(data) do CONFIG[k]=v end 
-    end
-    -- Sincroniza _Flags iniciais
-    for k,v in pairs(CONFIG) do if type(v)=="boolean" then CONFIG._Flags[k]=v end end
-end
-LoadConfig()
-
--- 🔵 5. FUNÇÕES CORE (Seguras) -----------------------------------------------------------
-local function Notify(t, c, d, i) pcall(function() Rayfield:Notify({Title=t, Content=c, Duration=d or 3, Image=i or "INFO"}) end) end
-local function LimitSpeed(s) return math.min(s, CONFIG.LimiteVelocidade) end
-
--- Aplica física no Char Atual (SafeChar)
-local function ApplyPhysics()
-    local char = SafeChar:GetCharacter()
-    local hum = SafeChar:GetHumanoid(char)
-    local root = SafeChar:GetRootPart(char)
-    if not hum or not root then return end
-
-    pcall(function()
-        local speed = CONFIG.AplicarVelocidade and LimitSpeed(CONFIG.VelocidadeGlobal) or LimitSpeed(CONFIG.WalkSpeed)
-        hum.WalkSpeed = speed
-        hum.JumpPower = CONFIG.JumpPower
-        hum.UseJumpPower = true
-        hum.Sit = CONFIG.Sit
-        workspace.Gravity = CONFIG.Gravity * 196.2
-        camera.FieldOfView = CONFIG.FOV
-    end)
-
-    -- Spin (BodyAngularVelocity Safe)
-    local bav = root:FindFirstChild("UniversalSpin")
-    if CONFIG.Spin then
-        if not bav then 
-            bav = Instance.new("BodyAngularVelocity"); 
-            bav.Name="UniversalSpin"; 
-            bav.MaxTorque=Vector3.new(0,math.huge,0); 
-            bav.Parent=root 
-        end
-        bav.AngularVelocity = Vector3.new(0, CONFIG.SpinSpeed, 0)
-    elseif bav then 
-        bav:Destroy() 
-    end
-end
-
--- Função auxiliar para pegar intervalo respeitando AntiLag
-local function GetInterval(base)
-    return CONFIG.AntiLag and (base * 2) or base
-end
-
--- Visuals Loop (Lightweight)
-Watchdog:Wrap("VisualsLoop", function()
-    camera.FieldOfView = CONFIG.FOV
-    if CONFIG.Fullbright then 
-        Lighting.Brightness=2; Lighting.ClockTime=14; Lighting.FogEnd=1e5; Lighting.GlobalShadows=false 
-    else 
-        Lighting.GlobalShadows=true 
-    end
-    if CONFIG.NoFog then Lighting.FogEnd=1e5 else Lighting.FogEnd=300 end
-end, GetInterval(1)) -- Roda 1x por seg (ou 2x se AntiLag)
-
--- ESP Loop (Safe)
-Watchdog:Wrap("ESPLoop", function()
-    if not CONFIG.ESP then 
-        for _,hl in pairs(ESP_Highlights) do pcall(function() hl:Destroy() end) end; 
-        table.clear(ESP_Highlights); 
-        return 
-    end
-    for _,plr in pairs(Players:GetPlayers()) do
-        if plr ~= player and plr.Character and SafeChar:GetRootPart(plr.Character) then
-            local hl = ESP_Highlights[plr]
-            if not hl or not hl.Parent then
-                hl = Instance.new("Highlight"); hl.Name="UniversalESP"; hl.FillTransparency=0.5; hl.OutlineTransparency=0; hl.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop; hl.Parent=plr.Character; ESP_Highlights[plr]=hl
-            end
-            hl.FillColor = plr.TeamColor.Color; hl.OutlineColor = Color3.new(1,1,1)
-        end
-    end
-    -- Limpa highlights de players que saíram
-    for plr, hl in pairs(ESP_Highlights) do 
-        if not Players:FindFirstChild(plr.Name) then 
-            pcall(function() hl:Destroy() end); 
-            ESP_Highlights[plr]=nil 
-        end 
-    end
-end, GetInterval(0.5))
-
--- Noclip Loop (Safe) - Precisa ser Heartbeat (interval 0) para não travar em paredes
-Watchdog:Wrap("NoclipLoop", function()
-    if not CONFIG.Noclip then return end
-    local char = SafeChar:GetCharacter()
-    if not char then return end
-    for _,part in pairs(char:GetDescendants()) do
-        if part:IsA("BasePart") and part.CanCollide then part.CanCollide = false end
-    end
-end, 0) -- 0 = Heartbeat
-
--- Infinite Jump (Event Based - Safe)
-Connections.InfJump = UserInputService.JumpRequest:Connect(function()
-    if CONFIG.InfiniteJump then
-        local hum = SafeChar:GetHumanoid()
-        if hum then pcall(function() hum:ChangeState(Enum.HumanoidStateType.Jumping) end) end
-    end
-end)
-
--- Anti-AFK (VirtualInput - Real Click)
-Connections.AntiAFK = player.Idled:Connect(function()
-    if CONFIG.AntiAFK then
-        -- Simula movimento de mouse leve + tecla
-        VInput:PressKey(Enum.KeyCode.Unknown) -- Wake up
-        VInput:Click(math.random(100, 500), math.random(100, 500))
-    end
-end)
-
--- 🔵 6. FEATURES COMPLEXAS (Fly, FreeCam, ClickTP) ------------------------
-
--- FLY: Usa WASD + Space/Shift via UserInputService + CFrame suave (Híbrido Seguro)
--- PlataformStand = true ZERA MoveDirection. Logo, lemos teclas MANUALMENTE.
-local function ToggleFly(state)
-    CONFIG.Fly = state; CONFIG._Flags.Fly = state
-    local char = SafeChar:GetCharacter()
-    local hum = SafeChar:GetHumanoid(char)
-    local root = SafeChar:GetRootPart(char)
-    if not hum or not root then return Notify("Fly", "Character não encontrado.", 3, "ERROR") end
-
-    if state then
-        hum.PlatformStand = true -- Para animações e física padrão
-        FreeCamCFrame = root.CFrame
-        Notify("Fly", "Ativado (WASD + Space/Shift). Modo Seguro.", 3, "SUCCESS")
-        
-        -- Usamos RenderStepped para input suave visualmente
-        FlyConnection = RunService.RenderStepped:Connect(function(dt)
-            if not CONFIG.Fly then return ToggleFly(false) end
-            local hum = SafeChar:GetHumanoid()
-            local root = SafeChar:GetRootPart()
-            if not hum or not root then return ToggleFly(false) end
-
-            local moveDir = Vector3.zero
-            local camCF = camera.CFrame
-            local speed = (CONFIG.AplicarVelocidade and CONFIG.VelocidadeGlobal or CONFIG.FlySpeed) * dt
-            
-            -- LEITURA MANUAL DE TECLAS (Funciona com PlatformStand=true)
-            if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir -= camCF.LookVector end
-            if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir += camCF.LookVector end
-            if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir -= camCF.RightVector end
-            if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir += camCF.RightVector end
-            
-            -- Vertical
-            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDir += Vector3.new(0, 1, 0) end
-            if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then moveDir -= Vector3.new(0, 1, 0) end
-
-            -- Aplica Movimento (Apenas Horizontal relativo à camera + Vertical global)
-            if moveDir.Magnitude > 0 then
-                -- Normaliza apenas componentes XZ para velocidade consistente no chão/ar
-                local horizontal = Vector3.new(moveDir.X, 0, moveDir.Z)
-                local vertical = Vector3.new(0, moveDir.Y, 0)
-                local finalMove = Vector3.zero
-                if horizontal.Magnitude > 0 then finalMove += horizontal.Unit * speed end
-                if vertical.Magnitude > 0 then finalMove += vertical.Unit * speed end
-                
-                root.CFrame = root.CFrame + finalMove
-            end
-
-            -- Cancela velocidades físicas para não "escorregar" ou cair
-            root.AssemblyLinearVelocity = Vector3.zero
-            root.AssemblyAngularVelocity = Vector3.zero
-        end)
-    else
-        if FlyConnection then FlyConnection:Disconnect(); FlyConnection = nil end
-        if hum then hum.PlatformStand = false end
-        Notify("Fly", "Desativado.", 2, "INFO")
-    end
-end
-
--- FREECAM: Desacopla Camera Total (RenderStepped)
-local function ToggleFreeCam(state)
-    CONFIG.FreeCam = state; CONFIG._Flags.FreeCam = state
-    local hum = SafeChar:GetHumanoid()
-    local root = SafeChar:GetRootPart()
-    
-    if state and root then
-        FreeCamEnabled = true
-        FreeCamCFrame = camera.CFrame
-        camera.CameraType = Enum.CameraType.Scriptable
-        camera.CameraSubject = nil
-        if hum then hum.WalkSpeed = 0; hum.JumpPower = 0 end -- Trava player
-        
-        FreeCamConn = RunService.RenderStepped:Connect(function(dt)
-            if not CONFIG.FreeCam then return ToggleFreeCam(false) end
-            local speed = 100 * dt
-            local move = Vector3.zero
-            local cf = camera.CFrame
-            
-            if UserInputService:IsKeyDown(Enum.KeyCode.W) then move += cf.LookVector end
-            if UserInputService:IsKeyDown(Enum.KeyCode.S) then move -= cf.LookVector end
-            if UserInputService:IsKeyDown(Enum.KeyCode.D) then move += cf.RightVector end
-            if UserInputService:IsKeyDown(Enum.KeyCode.A) then move -= cf.RightVector end
-            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then move += Vector3.new(0,1,0) end
-            if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then move -= Vector3.new(0,1,0) end
-            
-            if move.Magnitude > 0 then
-                camera.CFrame = camera.CFrame + (move.Unit * speed)
-            end
-        end)
-    else
-        FreeCamEnabled = false
-        if FreeCamConn then FreeCamConn:Disconnect(); FreeCamConn = nil end
-        camera.CameraType = Enum.CameraType.Custom
-        camera.CameraSubject = hum
-        if hum then ApplyPhysics() end -- Restaura speed/jump
-    end
-end
-
--- CLICK TP: VirtualInput Raycast (Funciona Mobile/PC)
-Connections.ClickTP = UserInputService.InputBegan:Connect(function(input, processed)
-    if processed or not CONFIG.ClickTP then return end
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        local root = SafeChar:GetRootPart()
-        if not root then return end
-        
-        local screenPos = input.Position
-        local ray = camera:ViewportPointToRay(screenPos.X, screenPos.Y)
-        local params = RaycastParams.new()
-        params.FilterDescendantsInstances = {player.Character}
-        params.FilterType = Enum.RaycastFilterType.Exclude
-        
-        local result = workspace:Raycast(ray.Origin, ray.Direction * 1000, params)
-        if result then
-            root.CFrame = CFrame.new(result.Position + Vector3.new(0, 3, 0))
-        end
-    end
-end)
-
--- CHARACTER RESPAWN HANDLER
-Connections.Respawn = player.CharacterAdded:Connect(function(char)
-    task.wait(0.5) -- Wait for replication
-    ApplyPhysics()
-    -- Re-ativa features ligadas (Watchdog loops auto-reconectam via _Flags, mas Fly/FreeCam precisam de chamada)
-    if CONFIG.Fly then ToggleFly(true) end
-    if CONFIG.FreeCam then ToggleFreeCam(true) end
-end)
-
--- 🔵 7. UI RAYFIELD (Binded to CONFIG._Flags) -------------------------------------------
-local Window = Rayfield:CreateWindow({
-    Name = "Universal Hub 🛡️ Safe",
-    LoadingTitle = "Carregando Sistema Seguro...",
-    LoadingSubtitle = `PlaceId: ${PlaceId}`,
-    ConfigurationSaving = { Enabled = true, FolderName = "UniversalHubSafe", FileName = `Config_${PlaceId}` },
-    KeySystem = false
-})
-
-local Tab = Window:CreateTab("Player", 4483362458)
-
--- Helper para criar UI sincronizada com Watchdog
-local function CreateSafeToggle(name, text, default, callback)
-    CONFIG._Flags[name] = default
-    return Tab:CreateToggle({
-        Name = text, CurrentValue = default, Flag = name,
-        Callback = function(v)
-            CONFIG._Flags[name] = v
-            CONFIG[name] = v
-            if callback then callback(v) end
-            SaveConfig()
-        end
-    })
-end
-
-local function CreateSafeSlider(name, text, range, inc, default, callback)
-    return Tab:CreateSlider({
-        Name = text, Range = range, Increment = inc, CurrentValue = default, Flag = name,
-        Callback = function(v)
-            CONFIG[name] = v
-            if callback then callback(v) end
-            SaveConfig()
-        end
-    })
-end
-
--- SECTIONS
-Tab:CreateSection("🏃 Movimento (Safe)")
-CreateSafeSlider("WalkSpeed", "WalkSpeed", {1, 500}, 1, CONFIG.WalkSpeed, function(v) ApplyPhysics() end)
-CreateSafeSlider("JumpPower", "JumpPower", {50, 300}, 1, CONFIG.JumpPower, function(v) ApplyPhysics() end)
-CreateSafeSlider("Gravity", "Gravidade", {0.1, 5}, 0.1, CONFIG.Gravity, function(v) workspace.Gravity = v * 196.2 end)
-CreateSafeToggle("InfiniteJump", "Infinite Jump", CONFIG.InfiniteJump)
-CreateSafeToggle("Noclip", "Noclip (Paredes)", CONFIG.Noclip)
-CreateSafeToggle("Spin", "Spin (Giro)", CONFIG.Spin)
-CreateSafeSlider("SpinSpeed", "Spin Speed", {1, 100}, 1, CONFIG.SpinSpeed)
-CreateSafeToggle("Sit", "Sentar", CONFIG.Sit)
-
-Tab:CreateSection("✈️ Fly Seguro (CFrame + Input)")
-CreateSafeToggle("Fly", "Ativar Fly (WASD + Space/Shift)", CONFIG.Fly, ToggleFly)
-CreateSafeSlider("FlySpeed", "Velocidade Fly", {1, 500}, 1, CONFIG.FlySpeed)
-
-Tab:CreateSection("👁️ Visuais")
-CreateSafeToggle("ESP", "ESP Players (Highlight)", CONFIG.ESP)
-CreateSafeToggle("Fullbright", "Fullbright", CONFIG.Fullbright)
-CreateSafeToggle("NoFog", "Sem Neblina", CONFIG.NoFog)
-CreateSafeSlider("FOV", "Field of View", {30, 120}, 1, CONFIG.FOV, function(v) camera.FieldOfView = v end)
-CreateSafeToggle("FreeCam", "FreeCam (Câmera Livre)", CONFIG.FreeCam, ToggleFreeCam)
-
-Tab:CreateSection("⚙️ Utilidades & Segurança")
-CreateSafeToggle("AntiAFK", "Anti-AFK (Clique Real)", CONFIG.AntiAFK)
-CreateSafeToggle("ClickTP", "Click TP (Toque/Click)", CONFIG.ClickTP)
-CreateSafeToggle("AntiLag", "Anti-Lag (Reduz Updates Visuais)", CONFIG.AntiLag)
-
--- Speed Master Controls
-Tab:CreateSection("🚀 Velocidade Global (Master)")
-CreateSafeSlider("VelocidadeGlobal", "Velocidade Global", {1, 1000}, 1, CONFIG.VelocidadeGlobal)
-CreateSafeToggle("AplicarVelocidade", "APLICAR VELOCIDADE GLOBAL", CONFIG.AplicarVelocidade, function(v) ApplyPhysics() end)
-CreateSafeSlider("LimiteVelocidade", "Limite Máximo Seguro", {1, 1000}, 1, CONFIG.LimiteVelocidade)
-
--- Buttons
-Tab:CreateButton({Name = "💾 Salvar Config (Este Jogo)", Callback = function() SaveConfig(); Notify("Salvo", "Config salva para PlaceId: "..PlaceId) end})
-Tab:CreateButton({Name = "📂 Carregar Config (Este Jogo)", Callback = function() LoadConfig(); ApplyPhysics(); Notify("Carregado", "Config carregada.") end})
-Tab:CreateButton({Name = "🔄 Resetar Tudo (Padrão)", Callback = function()
-    for _,conn in pairs(Connections) do pcall(function() conn:Disconnect() end) end
-    for _,loop in pairs(Watchdog.ActiveLoops) do 
-        if type(loop) == "thread" then task.cancel(loop) else pcall(function() loop:Disconnect() end) end 
-    end
-    if FlyConnection then FlyConnection:Disconnect() end
-    if FreeCamConn then FreeCamConn:Disconnect() end
-    -- Reset Config Table
-    CONFIG = {WalkSpeed=16,JumpPower=50,Gravity=1,InfiniteJump=false,Noclip=false,Spin=false,SpinSpeed=10,Sit=false,Fly=false,FlySpeed=50,ESP=false,Fullbright=false,NoFog=false,FOV=70,FreeCam=false,AntiAFK=false,AntiLag=false,ClickTP=false,VelocidadeGlobal=1000,AplicarVelocidade=false,LimiteVelocidade=1000,_Flags={}}
-    LoadConfig() -- Recria _Flags
-    ApplyPhysics()
-    Notify("Reset", "Script reiniciado. Reexecute se necessário.", 5, "SUCCESS")
-end})
-Tab:CreateButton({Name = "💀 Resetar Personagem", Callback = function() local h=SafeChar:GetHumanoid() if h then h.Health=0 end end})
-Tab:CreateButton({Name = "🔁 Rejoin", Callback = function() TeleportService:TeleportToPlaceInstance(PlaceId, game.JobId, player) end})
-Tab:CreateButton({Name = "🌐 Server Hop", Callback = function()
-    Notify("Server Hop", "Procurando servidor...", 10)
-    task.spawn(function()
-        -- Verifica se executor suporta RequestAsync (Synapse, Fluxus, CodeX, Hydrogen, Delta Novo)
-        local requestFunc = request or http_request or (syn and syn.request) or (fluxus and fluxus.request)
-        if not requestFunc then 
-            Notify("Erro", "Executor não suporta HTTP Request (Server Hop).", 5, "ERROR") 
-            return 
-        end
-        
-        local ok, res = pcall(function() 
-            return requestFunc({Url=`https://games.roblox.com/v1/games/${PlaceId}/servers/Public?sortOrder=Asc&limit=100`, Method="GET"}) 
-        end)
-        
-        if ok and res.Success then
-            local data = HttpService:JSONDecode(res.Body)
-            for _,s in pairs(data.data) do 
-                if s.id ~= game.JobId and s.playing < s.maxPlayers then 
-                    TeleportService:TeleportToPlaceInstance(PlaceId, s.id, player); 
-                    return 
-                end 
-            end
-            Notify("Server Hop", "Todos lotados ou erro.", 5, "WARNING")
-        else 
-            Notify("Erro", "Falha na API Roblox.", 5, "ERROR") 
-        end
-    end)
-end})
-
--- 🔵 8. INITIALIZE & SYNC ---------------------------------------------------------------
-ApplyPhysics()
-
--- CRÍTICO: Carrega config da UI (Rayfield salva em arquivo proprio) e Sincroniza com CONFIG/_Flags
--- Isso garante que se você salvou "Fly = true" na UI, ele liga ao executar.
-task.defer(function()
-    pcall(function() Rayfield:LoadConfiguration() end)
-    
-    -- Sincroniza Flags da UI -> CONFIG Table
-    if Rayfield.Flags then
-        for flagName, flagObj in pairs(Rayfield.Flags) do
-            if CONFIG._Flags[flagName] ~= nil and flagObj.CurrentValue ~= nil then
-                local val = flagObj.CurrentValue
-                CONFIG._Flags[flagName] = val
-                CONFIG[flagName] = val
-                -- Dispara callbacks manuais para features complexas
-                if flagName == "Fly" and val then ToggleFly(true) end
-                if flagName == "FreeCam" and val then ToggleFreeCam(true) end
-                -- Loops (Noclip, ESP, Visuals) já checam _Flags no Watchdog automaticamente
-            end
-        end
-    end
-    
-    -- Nome do jogo no notify final (Assíncrono para não travar)
-    task.spawn(function()
-        local ok, info = pcall(function() return MarketplaceService:GetProductInfo(PlaceId) end)
-        local gameName = ok and info.Name or "Desconhecido"
-        Notify("✅ Universal Hub Safe", "Carregado com Watchdog & VirtualInput.\nJogo: " .. gameName, 6, "SUCCESS")
-    end)
-end)
-
--- Cleanup Global (Se der reload script / getgenv suportado)
-getgenv()._UniversalHubCleanup = function()
-    for _,c in pairs(Connections) do pcall(function() c:Disconnect() end) end
-    for _,loop in pairs(Watchdog.ActiveLoops) do 
-        if type(loop) == "thread" then task.cancel(loop) else pcall(function() loop:Disconnect() end) end 
-    end
-    if FlyConnection then FlyConnection:Disconnect() end
-    if FreeCamConn then FreeCamConn:Disconnect() end
-    -- Restaura Kick original
-    if OldKick then pcall(function() hookfunction(player.Kick, OldKick) end) end
-    if OldTeleport then pcall(function() hookfunction(TeleportService.TeleportToPlaceInstance, OldTeleport) end) end
-    print("[UniversalHub] Cleanup completo.")
-end
